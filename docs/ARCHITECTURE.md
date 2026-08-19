@@ -61,3 +61,21 @@ GitHub Actions is the build and test environment. CI produces:
 - dependency report;
 - Android permission evidence;
 - unit, lint, and build reports.
+
+
+## Layout-aware OCR pipeline
+
+Before document rendering, the bundled OCR engine now performs four-orientation evaluation
+(0, 180, 90, and 270 degrees) and chooses the most plausible result using recognition
+confidence, readable-character ratio, word-like token ratio, and noise penalties.
+
+The `ReadingOrderResolver` then classifies detected geometry into:
+
+- single-column: natural top-to-bottom order;
+- multi-column/newspaper: complete the left column top-to-bottom before moving right;
+- poster/freeform: prioritize visually prominent headings, then nearby content zones;
+- grid: preserve row-major top-to-bottom and left-to-right order.
+
+The selected rotation and layout class are retained in the engine identifier for traceability.
+These heuristics improve reading order but do not recreate arbitrary graphic design or guarantee
+semantic interpretation of every package, poster, table, or heavily distorted photograph.

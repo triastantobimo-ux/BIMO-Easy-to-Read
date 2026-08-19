@@ -1,7 +1,6 @@
 package com.bimo.easytoread.core;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -17,18 +16,12 @@ public final class DocumentStructureEngine {
             "^[•◦▪‣*-]\\s+.+"
     );
 
-    public DocumentModel structure(String engineId, List<DetectedLine> source) {
-        List<DetectedLine> lines = new ArrayList<>();
-        if (source != null) {
-            for (DetectedLine line : source) {
-                if (line != null && !line.getText().trim().isEmpty()) lines.add(line);
-            }
-        }
-        if (lines.isEmpty()) return new DocumentModel(engineId, new ArrayList<>());
+    private final ReadingOrderResolver readingOrderResolver = new ReadingOrderResolver();
 
-        lines.sort(Comparator
-                .comparingInt((DetectedLine line) -> line.getBox().getTop())
-                .thenComparingInt(line -> line.getBox().getLeft()));
+    public DocumentModel structure(String engineId, List<DetectedLine> source) {
+        ReadingOrderResolver.Result resolved = readingOrderResolver.resolve(source);
+        List<DetectedLine> lines = resolved.getLines();
+        if (lines.isEmpty()) return new DocumentModel(engineId, new ArrayList<>());
 
         double medianHeight = medianHeight(lines);
         lines = restoreMissingNestedBullets(lines, medianHeight);
@@ -55,7 +48,11 @@ public final class DocumentStructureEngine {
             previous = line;
         }
         if (!current.isEmpty()) blocks.add(new DocumentModel.Block(currentType, current));
-        return new DocumentModel(engineId, blocks);
+
+        String tracedEngineId = engineId
+                + "|layout="
+                + resolved.getLayoutType().name().toLowerCase(Locale.ROOT);
+        return new DocumentModel(tracedEngineId, blocks);
     }
 
     private static List<DetectedLine> restoreMissingNestedBullets(
@@ -72,6 +69,13 @@ public final class DocumentStructureEngine {
         for (DetectedLine original : lines) {
             DetectedLine line = original;
             String text = line.getText().trim();
+
+            if (previous != null
+                    && line.getBox().getTop()
+                    < previous.getBox().getTop() - medianHeight * 0.75) {
+                expectsNestedList = false;
+                nestedLeft = -1;
+            }
 
             if (isOrderedListText(text)) {
                 parentLeft = line.getBox().getLeft();
@@ -116,6 +120,10 @@ public final class DocumentStructureEngine {
     }
 
     private static boolean isSeparated(DetectedLine previous, DetectedLine current, double medianHeight) {
+        if (current.getBox().getTop()
+                < previous.getBox().getTop() - medianHeight * 0.75) {
+            return true;
+        }
         int verticalGap = current.getBox().getTop() - previous.getBox().getBottom();
         if (verticalGap > medianHeight * 1.45) return true;
         return verticalGap > medianHeight * 0.75

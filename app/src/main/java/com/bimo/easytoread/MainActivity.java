@@ -171,12 +171,8 @@ public final class MainActivity extends Activity {
         inputPanel.setVisibility(output ? View.GONE : View.VISIBLE);
         outputPanel.setVisibility(output ? View.VISIBLE : View.GONE);
 
-        tabInput.setBackgroundResource(output
-                ? R.drawable.bg_tab_unselected
-                : R.drawable.bg_tab_selected);
-        tabOutput.setBackgroundResource(output
-                ? R.drawable.bg_tab_selected
-                : R.drawable.bg_tab_unselected);
+        tabInput.setBackground(new NotchedTabDrawable(this, !output));
+        tabOutput.setBackground(new NotchedTabDrawable(this, output));
 
         tabInput.setTextColor(getColor(output
                 ? R.color.text_primary
@@ -184,6 +180,15 @@ public final class MainActivity extends Activity {
         tabOutput.setTextColor(getColor(output
                 ? R.color.accent_secondary
                 : R.color.text_primary));
+
+        tabInput.setTypeface(Typeface.create(
+                "sans-serif-condensed",
+                output ? Typeface.NORMAL : Typeface.BOLD
+        ));
+        tabOutput.setTypeface(Typeface.create(
+                "sans-serif-condensed",
+                output ? Typeface.BOLD : Typeface.NORMAL
+        ));
     }
 
     private void adjustTextScale(int delta) {
@@ -204,7 +209,7 @@ public final class MainActivity extends Activity {
         boolean dark = (getResources().getConfiguration().uiMode
                 & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
         resultEditor.setTypeface(Typeface.create(
-                dark ? "monospace" : "sans-serif",
+                dark ? "monospace" : "sans-serif-condensed",
                 Typeface.NORMAL
         ));
     }

@@ -24,3 +24,10 @@ ML Kit is a no-cost Google SDK, not an open model. It remains a benchmark baseli
 - Reference: https://developer.android.com/studio/terms
 
 A generated dependency report is included in each GitHub Actions build artifact. Before production release, the complete transitive dependency notice set must be reviewed and bundled where required.
+
+
+## Material Icons
+
+The interface uses selected icons derived from Google Material Icons.
+Material Icons are licensed under the Apache License 2.0.
+Source project: https://github.com/google/material-design-icons
