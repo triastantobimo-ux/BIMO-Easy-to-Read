@@ -58,9 +58,11 @@ jobs:
         shell: bash
         run: |
           AAPT2="$ANDROID_HOME/build-tools/36.0.0/aapt2"
-          APK="app/build/outputs/apk/debug/app-debug.apk"
-          "$AAPT2" dump permissions "$APK" | tee audit/apk-permissions.txt
-          if grep -Eq 'android.permission.(INTERNET|ACCESS_NETWORK_STATE|AD_ID)' audit/apk-permissions.txt; then
+          for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/*.apk; do
+            echo "=== $APK ==="
+            "$AAPT2" dump permissions "$APK"
+          done | tee audit/apk-permissions.txt
+          if grep -Eq '(android.permission.(INTERNET|ACCESS_NETWORK_STATE)|com.google.android.gms.permission.AD_ID)' audit/apk-permissions.txt; then
             echo "Forbidden network, analytics, or advertising permission detected."
             exit 1
           fi
