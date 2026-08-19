@@ -216,15 +216,19 @@ public final class ReadingOrderResolver {
     ) {
         if (!looksLikeGrid(lines, metrics)) return false;
         int gridLike = 0;
+        int numericCells = 0;
         for (DetectedLine line : lines) {
             String text = line.getText().trim();
             if (line.getBox().width() <= metrics.pageWidth * 0.32
                     && text.length() <= 12) {
                 gridLike++;
+                if (text.matches("\\d{1,4}")) numericCells++;
             }
         }
         return gridLike >= 4
-                && (double) gridLike / lines.size() >= 0.60;
+                && numericCells >= 3
+                && (double) gridLike / lines.size() >= 0.60
+                && (double) numericCells / gridLike >= 0.30;
     }
 
     private static List<DetectedLine> orderGrid(
