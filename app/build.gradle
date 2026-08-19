@@ -1,0 +1,71 @@
+plugins {
+    id 'com.android.application'
+}
+
+def keystorePath = System.getenv('ANDROID_KEYSTORE_PATH')
+
+android {
+    namespace 'com.bimo.easytoread'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'com.bimo.easytoread'
+        minSdk 26
+        targetSdk 36
+        versionCode 1
+        versionName '0.1.0-cp1'
+        testInstrumentationRunner 'android.test.InstrumentationTestRunner'
+    }
+
+    signingConfigs {
+        release {
+            if (keystorePath) {
+                storeFile file(keystorePath)
+                storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('ANDROID_KEY_ALIAS')
+                keyPassword System.getenv('ANDROID_KEY_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-debug'
+        }
+        release {
+            minifyEnabled true
+            shrinkResources true
+            if (keystorePath) {
+                signingConfig signingConfigs.release
+            }
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    packaging {
+        resources {
+            excludes += [
+                'META-INF/DEPENDENCIES',
+                'META-INF/LICENSE.md',
+                'META-INF/LICENSE-notice.md'
+            ]
+        }
+    }
+}
+
+dependencies {
+    implementation project(':core')
+
+    // Bundled Latin OCR model: no runtime model download and no cloud OCR call.
+    implementation 'com.google.mlkit:text-recognition:16.0.1'
+}

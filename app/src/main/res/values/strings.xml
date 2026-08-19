@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BIMO Easy to Read</string>
+    <string name="app_tagline">OCR lokal. Hasil langsung siap ditempel.</string>
+    <string name="choose_image">Pilih gambar</string>
+    <string name="take_photo">Ambil foto</string>
+    <string name="settings">Pengaturan</string>
+    <string name="image_preview">Pratinjau gambar sumber</string>
+    <string name="no_image">Pilih gambar atau ambil foto untuk memulai.</string>
+    <string name="processing">Membaca dan menyusun dokumen…</string>
+    <string name="result_title">Hasil OCR</string>
+    <string name="result_hint">Hasil OCR terstruktur akan tampil di sini.</string>
+    <string name="copy">Salin</string>
+    <string name="save_markdown">Simpan Markdown</string>
+    <string name="save_docx">Simpan Word</string>
+    <string name="share">Bagikan</string>
+    <string name="copied">Hasil disalin ke Clipboard.</string>
+    <string name="copy_updated">Hasil terbaru disalin.</string>
+    <string name="ocr_failed">OCR gagal: %1$s</string>
+    <string name="image_failed">Gambar tidak dapat dibaca: %1$s</string>
+    <string name="camera_unavailable">Aplikasi kamera tidak tersedia.</string>
+    <string name="empty_result">Tidak ada teks yang terdeteksi.</string>
+    <string name="save_success">Dokumen berhasil disimpan.</string>
+    <string name="save_failed">Dokumen gagal disimpan: %1$s</string>
+    <string name="share_chooser">Bagikan hasil OCR</string>
+    <string name="low_resolution_warning">Resolusi gambar rendah; hasil mungkin tidak lengkap.</string>
+    <string name="settings_title">Pengaturan</string>
+    <string name="appearance">Tampilan</string>
+    <string name="theme_system">Mengikuti sistem</string>
+    <string name="theme_light">Terang</string>
+    <string name="theme_dark">Gelap</string>
+    <string name="language">Bahasa antarmuka</string>
+    <string name="language_indonesian">Bahasa Indonesia</string>
+    <string name="language_english">English</string>
+    <string name="clipboard">Clipboard</string>
+    <string name="auto_copy">Salin otomatis setelah OCR</string>
+    <string name="sensitive_clip">Tandai hasil sebagai konten sensitif</string>
+    <string name="save_settings">Simpan pengaturan</string>
+    <string name="settings_saved">Pengaturan disimpan.</string>
+    <string name="privacy_note">OCR berjalan di perangkat. V1 tidak meminta akses internet dan tidak mengirim gambar atau teks keluar perangkat.</string>
+    <string name="document_ready">OCR selesai: %1$d blok, %2$d baris.</string>
+    <string name="select_source">Sumber gambar</string>
+</resources>

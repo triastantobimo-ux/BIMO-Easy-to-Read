@@ -1,0 +1,9 @@
+BIMO Easy to Read - Third-party notices
+
+Google ML Kit Text Recognition
+Bundled on-device OCR SDK.
+https://developers.google.com/ml-kit/vision/text-recognition/v2/android
+https://developers.google.com/terms
+
+This release contains no advertising SDK, analytics SDK, or cloud OCR client.
+See THIRD_PARTY_NOTICES.md in the source repository for dependency-level details.
