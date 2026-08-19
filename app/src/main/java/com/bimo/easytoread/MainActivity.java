@@ -191,13 +191,14 @@ public final class MainActivity extends Activity {
 
         if (requestCode == REQUEST_IMAGE && data != null && data.getData() != null) {
             Uri uri = data.getData();
-            int flags = data.getFlags()
-                    & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            if (flags != 0) {
+            if (Build.VERSION.SDK_INT < 33) {
                 try {
-                    getContentResolver().takePersistableUriPermission(uri, flags);
+                    getContentResolver().takePersistableUriPermission(
+                            uri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    );
                 } catch (SecurityException ignored) {
-                    // Photo Picker grants can be transient and still valid for immediate processing.
+                    // Some providers grant only transient access, which is enough for immediate OCR.
                 }
             }
             processUri(uri);
