@@ -39,8 +39,7 @@
             android:background="@drawable/bg_icon_button"
             android:contentDescription="@string/settings"
             android:padding="12dp"
-            android:src="@android:drawable/ic_menu_preferences"
-            android:tint="@color/accent_primary" />
+            android:src="@android:drawable/ic_menu_preferences" />
     </LinearLayout>
 
     <LinearLayout
