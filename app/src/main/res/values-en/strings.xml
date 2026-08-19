@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">BIMO Easy to Read</string>
+    <string name="app_icon">BIMO Easy to Read icon</string>
     <string name="app_tagline">On-device OCR. Ready to paste.</string>
+    <string name="tab_input">Scan</string>
+    <string name="tab_output">OCR result</string>
+    <string name="input_instruction">Choose an image, take a photo, or share an image to this app.</string>
     <string name="choose_image">Choose image</string>
     <string name="take_photo">Take photo</string>
     <string name="settings">Settings</string>
@@ -9,10 +13,19 @@
     <string name="no_image">Choose an image or take a photo to begin.</string>
     <string name="processing">Reading and structuring document…</string>
     <string name="result_title">OCR result</string>
-    <string name="result_hint">The structured OCR result will appear here.</string>
+    <string name="result_hint">The structured OCR result will appear here. Text can be edited and selected.</string>
+    <string name="no_result_meta">No result yet</string>
+    <string name="result_meta">%1$d blocks · %2$d lines</string>
+    <string name="result_meta_copied">%1$d blocks · %2$d lines · copied</string>
+    <string name="text_smaller">Decrease text size</string>
+    <string name="text_larger">Increase text size</string>
+    <string name="text_scale_default">100%</string>
+    <string name="text_scale_value">%1$d%%</string>
     <string name="copy">Copy</string>
     <string name="save_markdown">Save Markdown</string>
     <string name="save_docx">Save Word</string>
+    <string name="markdown_short">Markdown</string>
+    <string name="word_short">Word</string>
     <string name="share">Share</string>
     <string name="copied">Result copied to the Clipboard.</string>
     <string name="copy_updated">Latest result copied.</string>
@@ -37,7 +50,7 @@
     <string name="sensitive_clip">Mark results as sensitive content</string>
     <string name="save_settings">Save settings</string>
     <string name="settings_saved">Settings saved.</string>
-    <string name="privacy_note">OCR runs on this device. V1 requests no internet access and sends no image or text off the device.</string>
+    <string name="privacy_note">OCR runs on this device. The app requests no internet access and sends no image or text off the device.</string>
     <string name="document_ready">OCR complete: %1$d blocks, %2$d lines.</string>
     <string name="select_source">Image source</string>
 </resources>

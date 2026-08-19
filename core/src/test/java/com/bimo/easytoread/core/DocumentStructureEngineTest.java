@@ -29,6 +29,27 @@ public class DocumentStructureEngineTest {
     }
 
     @Test
+    public void restoresBulletsOmittedByOcrForIndentedChildrenAfterNumberedColon() {
+        DocumentModel document = new DocumentStructureEngine().structure(
+                "test-engine",
+                Arrays.asList(
+                        new DetectedLine("5. Masukkan ke GitHub Actions Secrets:", new Box(10, 10, 390, 24), 0.96f),
+                        new DetectedLine("ANDROID_KEYSTORE_BASE64", new Box(42, 28, 330, 42), 0.92f),
+                        new DetectedLine("ANDROID_KEYSTORE_PASSWORD", new Box(42, 46, 350, 60), 0.91f),
+                        new DetectedLine("ANDROID_KEY_ALIAS", new Box(42, 64, 300, 78), 0.93f),
+                        new DetectedLine("6. Buat tag versi beta.", new Box(10, 84, 320, 98), 0.95f)
+                )
+        );
+
+        String plain = document.toPlainText();
+        assertTrue(plain.contains("5. Masukkan ke GitHub Actions Secrets:\n"
+                + "• ANDROID_KEYSTORE_BASE64\n"
+                + "• ANDROID_KEYSTORE_PASSWORD\n"
+                + "• ANDROID_KEY_ALIAS\n"
+                + "6. Buat tag versi beta."));
+    }
+
+    @Test
     public void manualEditPreservesParagraphBoundaries() {
         DocumentModel document = DocumentModel.fromPlainText(
                 "First paragraph.\nStill first.\n\nSecond paragraph."

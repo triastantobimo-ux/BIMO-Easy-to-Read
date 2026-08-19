@@ -10,6 +10,12 @@ public final class DocumentStructureEngine {
     private static final Pattern LIST_PATTERN = Pattern.compile(
             "^(?:[•◦▪‣*-]|\\d{1,3}[.)]|[A-Za-z][.)])\\s+.+"
     );
+    private static final Pattern ORDERED_LIST_PATTERN = Pattern.compile(
+            "^(?:\\d{1,3}[.)]|[A-Za-z][.)])\\s+.+"
+    );
+    private static final Pattern BULLET_LIST_PATTERN = Pattern.compile(
+            "^[•◦▪‣*-]\\s+.+"
+    );
 
     public DocumentModel structure(String engineId, List<DetectedLine> source) {
         List<DetectedLine> lines = new ArrayList<>();
@@ -25,6 +31,8 @@ public final class DocumentStructureEngine {
                 .thenComparingInt(line -> line.getBox().getLeft()));
 
         double medianHeight = medianHeight(lines);
+        lines = restoreMissingNestedBullets(lines, medianHeight);
+
         List<DocumentModel.Block> blocks = new ArrayList<>();
         List<DetectedLine> current = new ArrayList<>();
         DocumentModel.BlockType currentType = null;
@@ -48,6 +56,57 @@ public final class DocumentStructureEngine {
         }
         if (!current.isEmpty()) blocks.add(new DocumentModel.Block(currentType, current));
         return new DocumentModel(engineId, blocks);
+    }
+
+    private static List<DetectedLine> restoreMissingNestedBullets(
+            List<DetectedLine> lines,
+            double medianHeight
+    ) {
+        List<DetectedLine> restored = new ArrayList<>();
+        boolean expectsNestedList = false;
+        int parentLeft = 0;
+        int nestedLeft = -1;
+        DetectedLine previous = null;
+        int minimumIndent = Math.max(8, (int) Math.round(medianHeight * 0.55));
+
+        for (DetectedLine original : lines) {
+            DetectedLine line = original;
+            String text = line.getText().trim();
+
+            if (isOrderedListText(text)) {
+                parentLeft = line.getBox().getLeft();
+                nestedLeft = -1;
+                expectsNestedList = text.endsWith(":");
+            } else if (isBulletListText(text)) {
+                if (expectsNestedList && nestedLeft < 0) {
+                    nestedLeft = line.getBox().getLeft();
+                }
+            } else if (expectsNestedList && previous != null) {
+                int left = line.getBox().getLeft();
+                int indent = left - parentLeft;
+                int verticalGap = line.getBox().getTop() - previous.getBox().getBottom();
+                boolean closeToPrevious = verticalGap <= medianHeight * 1.85;
+                boolean alignedWithChildren = nestedLeft < 0
+                        || Math.abs(left - nestedLeft) <= Math.max(12, medianHeight);
+
+                if (indent >= minimumIndent && closeToPrevious && alignedWithChildren) {
+                    line = new DetectedLine(
+                            "• " + text,
+                            line.getBox(),
+                            line.getConfidence()
+                    );
+                    if (nestedLeft < 0) nestedLeft = left;
+                } else if (left <= parentLeft + minimumIndent / 2
+                        || verticalGap > medianHeight * 2.25) {
+                    expectsNestedList = false;
+                    nestedLeft = -1;
+                }
+            }
+
+            restored.add(line);
+            previous = line;
+        }
+        return restored;
     }
 
     private static DocumentModel.BlockType classify(DetectedLine line, double medianHeight) {
@@ -85,6 +144,14 @@ public final class DocumentStructureEngine {
 
     static boolean isListText(String text) {
         return text != null && LIST_PATTERN.matcher(text.trim()).matches();
+    }
+
+    static boolean isOrderedListText(String text) {
+        return text != null && ORDERED_LIST_PATTERN.matcher(text.trim()).matches();
+    }
+
+    static boolean isBulletListText(String text) {
+        return text != null && BULLET_LIST_PATTERN.matcher(text.trim()).matches();
     }
 
     private static double medianHeight(List<DetectedLine> lines) {

@@ -18,15 +18,27 @@ public final class AppPreferences {
     private static final String KEY_LANGUAGE = "language";
     private static final String KEY_AUTO_COPY = "auto_copy";
     private static final String KEY_SENSITIVE = "sensitive_clip";
+    private static final String KEY_TEXT_SCALE = "text_scale";
 
     private AppPreferences() {}
 
     public static Context wrapLanguage(Context base) {
-        String language = preferences(base).getString(KEY_LANGUAGE, LANGUAGE_INDONESIAN);
+        SharedPreferences preferences = preferences(base);
+        String language = preferences.getString(KEY_LANGUAGE, LANGUAGE_INDONESIAN);
+        String theme = preferences.getString(KEY_THEME, THEME_SYSTEM);
+
         Locale locale = Locale.forLanguageTag(language);
         Locale.setDefault(locale);
         Configuration configuration = new Configuration(base.getResources().getConfiguration());
         configuration.setLocale(locale);
+
+        if (THEME_LIGHT.equals(theme)) {
+            configuration.uiMode = (configuration.uiMode & ~Configuration.UI_MODE_NIGHT_MASK)
+                    | Configuration.UI_MODE_NIGHT_NO;
+        } else if (THEME_DARK.equals(theme)) {
+            configuration.uiMode = (configuration.uiMode & ~Configuration.UI_MODE_NIGHT_MASK)
+                    | Configuration.UI_MODE_NIGHT_YES;
+        }
         return base.createConfigurationContext(configuration);
     }
 
@@ -55,6 +67,14 @@ public final class AppPreferences {
 
     public static boolean isSensitiveClipboard(Context context) {
         return preferences(context).getBoolean(KEY_SENSITIVE, true);
+    }
+
+    public static int getTextScale(Context context) {
+        return preferences(context).getInt(KEY_TEXT_SCALE, 100);
+    }
+
+    public static void setTextScale(Context context, int percent) {
+        preferences(context).edit().putInt(KEY_TEXT_SCALE, percent).apply();
     }
 
     public static void save(

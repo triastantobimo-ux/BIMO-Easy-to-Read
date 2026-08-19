@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">BIMO Easy to Read</string>
+    <string name="app_icon">Ikon BIMO Easy to Read</string>
     <string name="app_tagline">OCR lokal. Hasil langsung siap ditempel.</string>
+    <string name="tab_input">Pindai</string>
+    <string name="tab_output">Hasil OCR</string>
+    <string name="input_instruction">Pilih gambar, ambil foto, atau bagikan gambar ke aplikasi ini.</string>
     <string name="choose_image">Pilih gambar</string>
     <string name="take_photo">Ambil foto</string>
     <string name="settings">Pengaturan</string>
@@ -9,10 +13,19 @@
     <string name="no_image">Pilih gambar atau ambil foto untuk memulai.</string>
     <string name="processing">Membaca dan menyusun dokumen…</string>
     <string name="result_title">Hasil OCR</string>
-    <string name="result_hint">Hasil OCR terstruktur akan tampil di sini.</string>
+    <string name="result_hint">Hasil OCR terstruktur akan tampil di sini. Teks dapat diedit dan dipilih.</string>
+    <string name="no_result_meta">Belum ada hasil</string>
+    <string name="result_meta">%1$d blok · %2$d baris</string>
+    <string name="result_meta_copied">%1$d blok · %2$d baris · tersalin</string>
+    <string name="text_smaller">Perkecil teks</string>
+    <string name="text_larger">Perbesar teks</string>
+    <string name="text_scale_default">100%</string>
+    <string name="text_scale_value">%1$d%%</string>
     <string name="copy">Salin</string>
     <string name="save_markdown">Simpan Markdown</string>
     <string name="save_docx">Simpan Word</string>
+    <string name="markdown_short">Markdown</string>
+    <string name="word_short">Word</string>
     <string name="share">Bagikan</string>
     <string name="copied">Hasil disalin ke Clipboard.</string>
     <string name="copy_updated">Hasil terbaru disalin.</string>
@@ -37,7 +50,7 @@
     <string name="sensitive_clip">Tandai hasil sebagai konten sensitif</string>
     <string name="save_settings">Simpan pengaturan</string>
     <string name="settings_saved">Pengaturan disimpan.</string>
-    <string name="privacy_note">OCR berjalan di perangkat. V1 tidak meminta akses internet dan tidak mengirim gambar atau teks keluar perangkat.</string>
+    <string name="privacy_note">OCR berjalan di perangkat. Aplikasi tidak meminta akses internet dan tidak mengirim gambar atau teks keluar perangkat.</string>
     <string name="document_ready">OCR selesai: %1$d blok, %2$d baris.</string>
     <string name="select_source">Sumber gambar</string>
 </resources>

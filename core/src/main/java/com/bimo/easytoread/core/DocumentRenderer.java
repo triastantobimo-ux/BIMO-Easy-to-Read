@@ -12,10 +12,7 @@ public final class DocumentRenderer {
                     output.append("## ").append(block.joinedText());
                     break;
                 case LIST:
-                    for (int index = 0; index < block.getLines().size(); index++) {
-                        if (index > 0) output.append('\n');
-                        output.append(normalizeListItem(block.getLines().get(index).getText()));
-                    }
+                    appendMarkdownList(output, block);
                     break;
                 default:
                     output.append(block.joinedText());
@@ -23,6 +20,21 @@ public final class DocumentRenderer {
             }
         }
         return output.toString().trim();
+    }
+
+    private static void appendMarkdownList(StringBuilder output, DocumentModel.Block block) {
+        boolean orderedContext = false;
+        for (int index = 0; index < block.getLines().size(); index++) {
+            if (index > 0) output.append('\n');
+            String text = block.getLines().get(index).getText();
+            if (DocumentStructureEngine.isOrderedListText(text)) {
+                output.append(text);
+                orderedContext = true;
+            } else {
+                if (orderedContext) output.append("   ");
+                output.append("- ").append(stripListMarker(text));
+            }
+        }
     }
 
     public static String toHtml(DocumentModel document) {
@@ -33,13 +45,7 @@ public final class DocumentRenderer {
                     output.append("<h2>").append(escapeHtml(block.joinedText())).append("</h2>");
                     break;
                 case LIST:
-                    output.append("<ul>");
-                    for (DetectedLine line : block.getLines()) {
-                        output.append("<li>")
-                                .append(escapeHtml(stripListMarker(line.getText())))
-                                .append("</li>");
-                    }
-                    output.append("</ul>");
+                    appendExactListHtml(output, block);
                     break;
                 default:
                     output.append("<p>").append(escapeHtml(block.joinedText())).append("</p>");
@@ -49,8 +55,19 @@ public final class DocumentRenderer {
         return output.toString();
     }
 
-    private static String normalizeListItem(String text) {
-        return "- " + stripListMarker(text);
+    private static void appendExactListHtml(StringBuilder output, DocumentModel.Block block) {
+        output.append("<div>");
+        boolean orderedContext = false;
+        for (DetectedLine line : block.getLines()) {
+            String text = line.getText();
+            boolean ordered = DocumentStructureEngine.isOrderedListText(text);
+            boolean nestedBullet = !ordered && orderedContext;
+            output.append(nestedBullet ? "<div style=\"margin-left:2em\">" : "<div>")
+                    .append(escapeHtml(text))
+                    .append("</div>");
+            if (ordered) orderedContext = true;
+        }
+        output.append("</div>");
     }
 
     private static String stripListMarker(String text) {

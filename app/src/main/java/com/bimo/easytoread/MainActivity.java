@@ -6,12 +6,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -43,19 +48,32 @@ public final class MainActivity extends Activity {
     private static final int REQUEST_SETTINGS = 1003;
     private static final int REQUEST_EXPORT = 1004;
     private static final String STATE_RESULT = "result_text";
+    private static final String STATE_OUTPUT_TAB = "output_tab";
+    private static final int MIN_TEXT_SCALE = 80;
+    private static final int MAX_TEXT_SCALE = 160;
+    private static final int TEXT_SCALE_STEP = 10;
+    private static final float BASE_TEXT_SIZE_SP = 18f;
 
     private enum ExportType { MARKDOWN, DOCX }
 
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private final OcrEngine ocrEngine = new MlKitOcrEngine();
 
+    private View inputPanel;
+    private View outputPanel;
+    private View settingsButton;
+    private Button tabInput;
+    private Button tabOutput;
     private ImageView imagePreview;
     private TextView status;
+    private TextView resultMeta;
+    private TextView textScaleValue;
     private ProgressBar progress;
     private EditText resultEditor;
     private Button galleryButton;
     private Button cameraButton;
-    private Button settingsButton;
+    private Button textSmallerButton;
+    private Button textLargerButton;
     private Button copyButton;
     private Button shareButton;
     private Button markdownButton;
@@ -65,6 +83,8 @@ public final class MainActivity extends Activity {
     private Bitmap currentBitmap;
     private Uri pendingCaptureUri;
     private ExportType pendingExport;
+    private int textScalePercent;
+    private boolean showingOutput;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -79,25 +99,41 @@ public final class MainActivity extends Activity {
         bindViews();
         bindActions();
 
+        textScalePercent = clampTextScale(AppPreferences.getTextScale(this));
+        applyTextScale();
+
         if (state != null) {
             String restored = state.getString(STATE_RESULT, "");
             if (!restored.isEmpty()) {
                 currentDocument = DocumentModel.fromPlainText(restored);
                 resultEditor.setText(restored);
+                resultEditor.setSelection(0);
                 enableResultActions(true);
+                updateResultMeta(currentDocument, false);
             }
+            showTab(state.getBoolean(STATE_OUTPUT_TAB, !restored.isEmpty()));
+        } else {
+            showTab(false);
         }
         handleIncomingShare(getIntent());
     }
 
     private void bindViews() {
+        inputPanel = findViewById(R.id.inputPanel);
+        outputPanel = findViewById(R.id.outputPanel);
+        tabInput = findViewById(R.id.tabInput);
+        tabOutput = findViewById(R.id.tabOutput);
         imagePreview = findViewById(R.id.imagePreview);
         status = findViewById(R.id.textStatus);
+        resultMeta = findViewById(R.id.textResultMeta);
+        textScaleValue = findViewById(R.id.textScaleValue);
         progress = findViewById(R.id.progress);
         resultEditor = findViewById(R.id.editResult);
         galleryButton = findViewById(R.id.buttonGallery);
         cameraButton = findViewById(R.id.buttonCamera);
         settingsButton = findViewById(R.id.buttonSettings);
+        textSmallerButton = findViewById(R.id.buttonTextSmaller);
+        textLargerButton = findViewById(R.id.buttonTextLarger);
         copyButton = findViewById(R.id.buttonCopy);
         shareButton = findViewById(R.id.buttonShare);
         markdownButton = findViewById(R.id.buttonMarkdown);
@@ -105,15 +141,76 @@ public final class MainActivity extends Activity {
     }
 
     private void bindActions() {
+        tabInput.setOnClickListener(view -> showTab(false));
+        tabOutput.setOnClickListener(view -> showTab(true));
         galleryButton.setOnClickListener(view -> chooseImage());
         cameraButton.setOnClickListener(view -> takePhoto());
         settingsButton.setOnClickListener(
                 view -> startActivityForResult(new Intent(this, SettingsActivity.class), REQUEST_SETTINGS)
         );
+        textSmallerButton.setOnClickListener(view -> adjustTextScale(-TEXT_SCALE_STEP));
+        textLargerButton.setOnClickListener(view -> adjustTextScale(TEXT_SCALE_STEP));
         copyButton.setOnClickListener(view -> copyResult(false));
         shareButton.setOnClickListener(view -> shareResult());
         markdownButton.setOnClickListener(view -> requestExport(ExportType.MARKDOWN));
         docxButton.setOnClickListener(view -> requestExport(ExportType.DOCX));
+
+        resultEditor.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence value, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence value, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable value) {
+                enableResultActions(!value.toString().trim().isEmpty());
+            }
+        });
+    }
+
+    private void showTab(boolean output) {
+        showingOutput = output;
+        inputPanel.setVisibility(output ? View.GONE : View.VISIBLE);
+        outputPanel.setVisibility(output ? View.VISIBLE : View.GONE);
+
+        tabInput.setBackgroundResource(output
+                ? R.drawable.bg_tab_unselected
+                : R.drawable.bg_tab_selected);
+        tabOutput.setBackgroundResource(output
+                ? R.drawable.bg_tab_selected
+                : R.drawable.bg_tab_unselected);
+
+        tabInput.setTextColor(getColor(output
+                ? R.color.text_primary
+                : R.color.accent_secondary));
+        tabOutput.setTextColor(getColor(output
+                ? R.color.accent_secondary
+                : R.color.text_primary));
+    }
+
+    private void adjustTextScale(int delta) {
+        int next = clampTextScale(textScalePercent + delta);
+        if (next == textScalePercent) return;
+        textScalePercent = next;
+        AppPreferences.setTextScale(this, textScalePercent);
+        applyTextScale();
+    }
+
+    private void applyTextScale() {
+        float scaledSize = BASE_TEXT_SIZE_SP * textScalePercent / 100f;
+        resultEditor.setTextSize(TypedValue.COMPLEX_UNIT_SP, scaledSize);
+        textScaleValue.setText(getString(R.string.text_scale_value, textScalePercent));
+        textSmallerButton.setEnabled(textScalePercent > MIN_TEXT_SCALE);
+        textLargerButton.setEnabled(textScalePercent < MAX_TEXT_SCALE);
+
+        boolean dark = (getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+        resultEditor.setTypeface(Typeface.create(
+                dark ? "monospace" : "sans-serif",
+                Typeface.NORMAL
+        ));
+    }
+
+    private static int clampTextScale(int value) {
+        return Math.max(MIN_TEXT_SCALE, Math.min(MAX_TEXT_SCALE, value));
     }
 
     private void chooseImage() {
@@ -198,7 +295,7 @@ public final class MainActivity extends Activity {
                             Intent.FLAG_GRANT_READ_URI_PERMISSION
                     );
                 } catch (SecurityException ignored) {
-                    // Some providers grant only transient access, which is enough for immediate OCR.
+                    // Some providers grant only transient access, enough for immediate OCR.
                 }
             }
             processUri(uri);
@@ -209,6 +306,7 @@ public final class MainActivity extends Activity {
     }
 
     private void processUri(Uri uri) {
+        showTab(false);
         setBusy(true);
         status.setText(R.string.processing);
 
@@ -256,10 +354,13 @@ public final class MainActivity extends Activity {
         currentDocument = document;
         String plain = document.toPlainText();
         resultEditor.setText(plain);
+        if (!plain.isEmpty()) resultEditor.setSelection(0);
 
         if (plain.isEmpty()) {
             enableResultActions(false);
+            resultMeta.setText(R.string.no_result_meta);
             status.setText(R.string.empty_result);
+            showTab(true);
             return;
         }
 
@@ -269,7 +370,21 @@ public final class MainActivity extends Activity {
                 document.getBlocks().size(),
                 document.countLines()
         ));
+        updateResultMeta(document, false);
+        showTab(true);
         if (AppPreferences.isAutoCopy(this)) copyResult(true);
+    }
+
+    private void updateResultMeta(DocumentModel document, boolean copied) {
+        if (document == null || document.toPlainText().isEmpty()) {
+            resultMeta.setText(R.string.no_result_meta);
+            return;
+        }
+        resultMeta.setText(getString(
+                copied ? R.string.result_meta_copied : R.string.result_meta,
+                document.getBlocks().size(),
+                document.countLines()
+        ));
     }
 
     private DocumentModel effectiveDocument() {
@@ -288,6 +403,7 @@ public final class MainActivity extends Activity {
                 document,
                 AppPreferences.isSensitiveClipboard(this)
         );
+        updateResultMeta(document, true);
         Toast.makeText(
                 this,
                 automatic ? R.string.copied : R.string.copy_updated,
@@ -352,6 +468,8 @@ public final class MainActivity extends Activity {
         galleryButton.setEnabled(!busy);
         cameraButton.setEnabled(!busy);
         settingsButton.setEnabled(!busy);
+        tabInput.setEnabled(!busy);
+        tabOutput.setEnabled(!busy);
         if (busy) enableResultActions(false);
         else if (!resultEditor.getText().toString().trim().isEmpty()) enableResultActions(true);
     }
@@ -364,6 +482,7 @@ public final class MainActivity extends Activity {
     }
 
     private void showFailure(String message) {
+        showTab(false);
         status.setText(message);
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
@@ -379,6 +498,7 @@ public final class MainActivity extends Activity {
     protected void onSaveInstanceState(Bundle output) {
         super.onSaveInstanceState(output);
         output.putString(STATE_RESULT, resultEditor.getText().toString());
+        output.putBoolean(STATE_OUTPUT_TAB, showingOutput);
     }
 
     @Override

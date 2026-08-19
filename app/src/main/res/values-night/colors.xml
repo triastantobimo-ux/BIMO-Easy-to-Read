@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="surface_base">#040A13</color>
+    <color name="surface_top">#081321</color>
+    <color name="surface_elevated">#0C1A2A</color>
+    <color name="surface_editor">#06101D</color>
+    <color name="surface_pressed">#122A40</color>
+    <color name="surface_disabled">#172331</color>
+    <color name="text_primary">#EAF4FF</color>
+    <color name="text_secondary">#8FA7BD</color>
+    <color name="text_disabled">#60758A</color>
+    <color name="accent_primary">#8F4DFF</color>
+    <color name="accent_primary_pressed">#6F32D8</color>
+    <color name="accent_on_primary">#FFFFFF</color>
+    <color name="accent_secondary">#25D9FF</color>
+    <color name="accent_warm">#FF9E4A</color>
+    <color name="outline">#1A3850</color>
+    <color name="scrollbar_track">#203448</color>
+    <color name="scrollbar_thumb">#9A4DFF</color>
+    <color name="brand_primary">@color/accent_primary</color>
+    <color name="brand_primary_dark">@color/accent_secondary</color>
+    <color name="surface_light">#F0EFF8</color>
+    <color name="surface_dark">@color/surface_base</color>
+</resources>

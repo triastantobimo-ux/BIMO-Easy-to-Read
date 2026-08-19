@@ -1,7 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="brand_primary">#1667C5</color>
-    <color name="brand_primary_dark">#79B7FF</color>
-    <color name="surface_light">#F8FAFD</color>
-    <color name="surface_dark">#111418</color>
+    <color name="surface_base">#F0EFF8</color>
+    <color name="surface_top">#F8F7FC</color>
+    <color name="surface_elevated">#FAF9FF</color>
+    <color name="surface_editor">#F5F4FB</color>
+    <color name="surface_pressed">#E8E6F3</color>
+    <color name="surface_disabled">#DEDBE8</color>
+    <color name="text_primary">#12133B</color>
+    <color name="text_secondary">#676887</color>
+    <color name="text_disabled">#9796A8</color>
+    <color name="accent_primary">#211D78</color>
+    <color name="accent_primary_pressed">#171452</color>
+    <color name="accent_on_primary">#FFFFFF</color>
+    <color name="accent_secondary">#35D9A5</color>
+    <color name="accent_warm">#FF8A1F</color>
+    <color name="outline">#D8D7E8</color>
+    <color name="scrollbar_track">#D4D2E8</color>
+    <color name="scrollbar_thumb">#211D78</color>
+    <color name="brand_primary">@color/accent_primary</color>
+    <color name="brand_primary_dark">@color/accent_secondary</color>
+    <color name="surface_light">@color/surface_base</color>
+    <color name="surface_dark">#040A13</color>
 </resources>
