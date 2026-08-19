@@ -64,12 +64,13 @@
     </style>
 
     <style name="Widget.EasyRead.Button.Command" parent="Widget.EasyRead.Button.Secondary">
+        <item name="android:background">@drawable/bg_button_command</item>
         <item name="android:gravity">center</item>
-        <item name="android:textSize">11sp</item>
+        <item name="android:textSize">12sp</item>
         <item name="android:paddingStart">2dp</item>
-        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingTop">7dp</item>
         <item name="android:paddingEnd">2dp</item>
-        <item name="android:paddingBottom">4dp</item>
+        <item name="android:paddingBottom">5dp</item>
     </style>
 
     <style name="Widget.EasyRead.TextScale" parent="@android:style/Widget.Material.Button">

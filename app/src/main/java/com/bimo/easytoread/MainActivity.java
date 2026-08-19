@@ -49,8 +49,8 @@ public final class MainActivity extends Activity {
     private static final int REQUEST_EXPORT = 1004;
     private static final String STATE_RESULT = "result_text";
     private static final String STATE_OUTPUT_TAB = "output_tab";
-    private static final int MIN_TEXT_SCALE = 80;
-    private static final int MAX_TEXT_SCALE = 160;
+    private static final int MIN_TEXT_SCALE = 50;
+    private static final int MAX_TEXT_SCALE = 150;
     private static final int TEXT_SCALE_STEP = 10;
     private static final float BASE_TEXT_SIZE_SP = 18f;
 
@@ -171,8 +171,14 @@ public final class MainActivity extends Activity {
         inputPanel.setVisibility(output ? View.GONE : View.VISIBLE);
         outputPanel.setVisibility(output ? View.VISIBLE : View.GONE);
 
-        tabInput.setBackground(new NotchedTabDrawable(this, !output));
-        tabOutput.setBackground(new NotchedTabDrawable(this, output));
+        tabInput.setBackgroundResource(output
+                ? R.drawable.bg_tab_unselected
+                : R.drawable.bg_tab_selected);
+        tabOutput.setBackgroundResource(output
+                ? R.drawable.bg_tab_selected
+                : R.drawable.bg_tab_unselected);
+        tabInput.setSelected(!output);
+        tabOutput.setSelected(output);
 
         tabInput.setTextColor(getColor(output
                 ? R.color.text_primary

@@ -35,12 +35,15 @@ public final class ReadingOrderResolver {
         if (natural.size() < 2) return new Result(LayoutType.SINGLE_COLUMN, natural);
 
         PageMetrics metrics = PageMetrics.from(natural);
+        if (looksLikeStrongGrid(natural, metrics)) {
+            return new Result(LayoutType.GRID, orderGrid(natural, metrics));
+        }
         ColumnDetection columns = detectColumns(natural, metrics);
         if (columns != null) {
             return new Result(LayoutType.MULTI_COLUMN, orderColumns(columns, metrics));
         }
         if (looksLikeGrid(natural, metrics)) {
-            return new Result(LayoutType.GRID, natural);
+            return new Result(LayoutType.GRID, orderGrid(natural, metrics));
         }
         if (looksLikePoster(natural, metrics)) {
             return new Result(LayoutType.POSTER, orderPoster(natural, metrics));
@@ -207,6 +210,57 @@ public final class ReadingOrderResolver {
         return qualifyingRows >= 2;
     }
 
+    private static boolean looksLikeStrongGrid(
+            List<DetectedLine> lines,
+            PageMetrics metrics
+    ) {
+        if (!looksLikeGrid(lines, metrics)) return false;
+        int gridLike = 0;
+        for (DetectedLine line : lines) {
+            String text = line.getText().trim();
+            if (line.getBox().width() <= metrics.pageWidth * 0.32
+                    && text.length() <= 12) {
+                gridLike++;
+            }
+        }
+        return gridLike >= 4
+                && (double) gridLike / lines.size() >= 0.60;
+    }
+
+    private static List<DetectedLine> orderGrid(
+            List<DetectedLine> natural,
+            PageMetrics metrics
+    ) {
+        List<GridRow> rows = new ArrayList<>();
+        double tolerance = Math.max(2.0, metrics.medianHeight * 0.85);
+
+        for (DetectedLine line : natural) {
+            double center = (line.getBox().getTop() + line.getBox().getBottom()) / 2.0;
+            GridRow best = null;
+            double bestDistance = Double.MAX_VALUE;
+            for (GridRow row : rows) {
+                double distance = Math.abs(center - row.center);
+                if (distance <= tolerance && distance < bestDistance) {
+                    best = row;
+                    bestDistance = distance;
+                }
+            }
+            if (best == null) {
+                best = new GridRow();
+                rows.add(best);
+            }
+            best.add(line, center);
+        }
+
+        rows.sort(Comparator.comparingDouble(row -> row.center));
+        List<DetectedLine> ordered = new ArrayList<>();
+        for (GridRow row : rows) {
+            row.lines.sort(Comparator.comparingInt(line -> line.getBox().getLeft()));
+            ordered.addAll(row.lines);
+        }
+        return ordered;
+    }
+
     private static boolean looksLikePoster(List<DetectedLine> lines, PageMetrics metrics) {
         int prominent = 0;
         int largeGaps = 0;
@@ -287,6 +341,18 @@ public final class ReadingOrderResolver {
         int middle = values.size() / 2;
         if (values.size() % 2 == 1) return values.get(middle);
         return (values.get(middle - 1) + values.get(middle)) / 2.0;
+    }
+
+    private static final class GridRow {
+        private final List<DetectedLine> lines = new ArrayList<>();
+        private double center;
+
+        void add(DetectedLine line, double lineCenter) {
+            center = lines.isEmpty()
+                    ? lineCenter
+                    : (center * lines.size() + lineCenter) / (lines.size() + 1);
+            lines.add(line);
+        }
     }
 
     private static final class ColumnSeed {

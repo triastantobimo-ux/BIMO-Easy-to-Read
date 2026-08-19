@@ -6,6 +6,7 @@ import com.bimo.easytoread.core.Box;
 import com.bimo.easytoread.core.DetectedLine;
 import com.bimo.easytoread.core.DocumentModel;
 import com.bimo.easytoread.core.DocumentStructureEngine;
+import com.bimo.easytoread.core.TextLineNoiseFilter;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.text.Text;
 import com.google.mlkit.vision.text.TextRecognition;
@@ -14,14 +15,18 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public final class MlKitOcrEngine implements OcrEngine {
-    public static final String ENGINE_ID = "mlkit-latin-bundled-16.0.1-layout-aware";
+    public static final String ENGINE_ID =
+            "mlkit-latin-bundled-16.0.1-layout-aware-scene-enhanced";
     private static final int[] ROTATIONS = {0, 180, 90, 270};
 
     private final TextRecognizer recognizer =
             TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
     private final DocumentStructureEngine structureEngine = new DocumentStructureEngine();
+    private final ExecutorService processingExecutor = Executors.newSingleThreadExecutor();
 
     @Override
     public void recognize(Bitmap bitmap, Callback callback) {
@@ -36,15 +41,14 @@ public final class MlKitOcrEngine implements OcrEngine {
             Callback callback
     ) {
         if (rotationIndex >= ROTATIONS.length) {
-            finishCandidates(candidates, lastFailure, callback);
+            finishCandidates(bitmap, candidates, lastFailure, callback);
             return;
         }
 
         int rotation = ROTATIONS[rotationIndex];
-        InputImage input = InputImage.fromBitmap(bitmap, rotation);
-        recognizer.process(input)
-                .addOnSuccessListener(text -> {
-                    candidates.add(new Candidate(rotation, text, qualityScore(text)));
+        recognizer.process(InputImage.fromBitmap(bitmap, rotation))
+                .addOnSuccessListener(processingExecutor, text -> {
+                    candidates.add(new Candidate(rotation, "original", text, qualityScore(text)));
                     recognizeRotation(
                             bitmap,
                             rotationIndex + 1,
@@ -53,7 +57,7 @@ public final class MlKitOcrEngine implements OcrEngine {
                             callback
                     );
                 })
-                .addOnFailureListener(error -> recognizeRotation(
+                .addOnFailureListener(processingExecutor, error -> recognizeRotation(
                         bitmap,
                         rotationIndex + 1,
                         candidates,
@@ -63,6 +67,7 @@ public final class MlKitOcrEngine implements OcrEngine {
     }
 
     private void finishCandidates(
+            Bitmap bitmap,
             List<Candidate> candidates,
             Throwable lastFailure,
             Callback callback
@@ -74,18 +79,48 @@ public final class MlKitOcrEngine implements OcrEngine {
             return;
         }
 
+        Candidate bestOriginal = bestCandidate(candidates);
+        final Bitmap enhanced;
+        try {
+            enhanced = ImagePreprocessor.enhanceForSceneText(bitmap);
+        } catch (Throwable preprocessingFailure) {
+            callback.onSuccess(toDocument(bestOriginal));
+            return;
+        }
+
+        recognizer.process(InputImage.fromBitmap(enhanced, bestOriginal.rotation))
+                .addOnSuccessListener(processingExecutor, text -> {
+                    Candidate enhancedCandidate = new Candidate(
+                            bestOriginal.rotation,
+                            "enhanced",
+                            text,
+                            qualityScore(text)
+                    );
+                    Candidate best = enhancedCandidate.score > bestOriginal.score
+                            ? enhancedCandidate
+                            : bestOriginal;
+                    enhanced.recycle();
+                    callback.onSuccess(toDocument(best));
+                })
+                .addOnFailureListener(processingExecutor, error -> {
+                    enhanced.recycle();
+                    callback.onSuccess(toDocument(bestOriginal));
+                });
+    }
+
+    private static Candidate bestCandidate(List<Candidate> candidates) {
         Candidate best = candidates.get(0);
         for (int index = 1; index < candidates.size(); index++) {
             Candidate candidate = candidates.get(index);
             if (candidate.score > best.score) best = candidate;
         }
-        callback.onSuccess(toDocument(best.text, best.rotation));
+        return best;
     }
 
-    private DocumentModel toDocument(Text text, int rotation) {
+    private DocumentModel toDocument(Candidate candidate) {
         List<DetectedLine> lines = new ArrayList<>();
         int fallbackY = 0;
-        for (Text.TextBlock block : text.getTextBlocks()) {
+        for (Text.TextBlock block : candidate.text.getTextBlocks()) {
             for (Text.Line line : block.getLines()) {
                 String cleanText = sanitize(line.getText());
                 if (cleanText.isEmpty()) continue;
@@ -112,7 +147,14 @@ public final class MlKitOcrEngine implements OcrEngine {
                 ));
             }
         }
-        return structureEngine.structure(ENGINE_ID + "|rotation=" + rotation, lines);
+
+        List<DetectedLine> filtered = TextLineNoiseFilter.filter(lines);
+        String trace = ENGINE_ID
+                + "|rotation=" + candidate.rotation
+                + "|variant=" + candidate.variant
+                + "|raw-lines=" + lines.size()
+                + "|kept-lines=" + filtered.size();
+        return structureEngine.structure(trace, filtered);
     }
 
     static double qualityScore(Text text) {
@@ -221,15 +263,18 @@ public final class MlKitOcrEngine implements OcrEngine {
     @Override
     public void close() {
         recognizer.close();
+        processingExecutor.shutdownNow();
     }
 
     private static final class Candidate {
         private final int rotation;
+        private final String variant;
         private final Text text;
         private final double score;
 
-        Candidate(int rotation, Text text, double score) {
+        Candidate(int rotation, String variant, Text text, double score) {
             this.rotation = rotation;
+            this.variant = variant;
             this.text = text;
             this.score = score;
         }

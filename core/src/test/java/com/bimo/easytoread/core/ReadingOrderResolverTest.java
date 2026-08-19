@@ -76,6 +76,23 @@ public class ReadingOrderResolverTest {
         );
     }
 
+    @Test
+    public void gridRowsIgnoreSmallVerticalJitterAndReadLeftToRight() {
+        ReadingOrderResolver.Result result = resolver.resolve(Arrays.asList(
+                line("Thu", 210, 12, 250, 24),
+                line("Tue", 75, 8, 115, 20),
+                line("Mon", 10, 10, 50, 22),
+                line("Wed", 140, 11, 190, 23),
+                line("4", 210, 40, 230, 52),
+                line("2", 75, 38, 95, 50),
+                line("1", 10, 39, 30, 51),
+                line("3", 140, 41, 160, 53)
+        ));
+
+        assertEquals(ReadingOrderResolver.LayoutType.GRID, result.getLayoutType());
+        assertTexts(result.getLines(), "Mon", "Tue", "Wed", "Thu", "1", "2", "3", "4");
+    }
+
     private static DetectedLine line(String text, int left, int top, int right, int bottom) {
         return new DetectedLine(text, new Box(left, top, right, bottom), 0.95f);
     }
