@@ -24,8 +24,10 @@
     <string name="copy">Salin</string>
     <string name="save_markdown">Simpan Markdown</string>
     <string name="save_docx">Simpan Word</string>
+    <string name="save_xlsx">Simpan Excel</string>
     <string name="markdown_short">Markdown</string>
     <string name="word_short">Word</string>
+    <string name="excel_short">Excel</string>
     <string name="share">Bagikan</string>
     <string name="copied">Hasil disalin ke Clipboard.</string>
     <string name="copy_updated">Hasil terbaru disalin.</string>

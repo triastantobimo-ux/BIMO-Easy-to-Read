@@ -27,6 +27,7 @@ import android.widget.Toast;
 import com.bimo.easytoread.core.DocumentModel;
 import com.bimo.easytoread.core.DocumentRenderer;
 import com.bimo.easytoread.core.DocxExporter;
+import com.bimo.easytoread.core.XlsxExporter;
 import com.bimo.easytoread.ocr.MlKitOcrEngine;
 import com.bimo.easytoread.ocr.OcrEngine;
 import com.bimo.easytoread.platform.CaptureContentProvider;
@@ -54,7 +55,7 @@ public final class MainActivity extends Activity {
     private static final int TEXT_SCALE_STEP = 10;
     private static final float BASE_TEXT_SIZE_SP = 18f;
 
-    private enum ExportType { MARKDOWN, DOCX }
+    private enum ExportType { MARKDOWN, DOCX, XLSX }
 
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private final OcrEngine ocrEngine = new MlKitOcrEngine();
@@ -74,10 +75,11 @@ public final class MainActivity extends Activity {
     private Button cameraButton;
     private Button textSmallerButton;
     private Button textLargerButton;
-    private Button copyButton;
-    private Button shareButton;
-    private Button markdownButton;
-    private Button docxButton;
+    private View copyButton;
+    private View shareButton;
+    private View markdownButton;
+    private View docxButton;
+    private View xlsxButton;
 
     private DocumentModel currentDocument;
     private Bitmap currentBitmap;
@@ -138,6 +140,7 @@ public final class MainActivity extends Activity {
         shareButton = findViewById(R.id.buttonShare);
         markdownButton = findViewById(R.id.buttonMarkdown);
         docxButton = findViewById(R.id.buttonDocx);
+        xlsxButton = findViewById(R.id.buttonXlsx);
     }
 
     private void bindActions() {
@@ -154,6 +157,7 @@ public final class MainActivity extends Activity {
         shareButton.setOnClickListener(view -> shareResult());
         markdownButton.setOnClickListener(view -> requestExport(ExportType.MARKDOWN));
         docxButton.setOnClickListener(view -> requestExport(ExportType.DOCX));
+        xlsxButton.setOnClickListener(view -> requestExport(ExportType.XLSX));
 
         resultEditor.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence value, int start, int count, int after) {}
@@ -443,9 +447,12 @@ public final class MainActivity extends Activity {
         if (type == ExportType.MARKDOWN) {
             intent.setType("text/markdown");
             intent.putExtra(Intent.EXTRA_TITLE, "OCR-" + timestamp + ".md");
-        } else {
+        } else if (type == ExportType.DOCX) {
             intent.setType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
             intent.putExtra(Intent.EXTRA_TITLE, "OCR-" + timestamp + ".docx");
+        } else {
+            intent.setType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            intent.putExtra(Intent.EXTRA_TITLE, "OCR-" + timestamp + ".xlsx");
         }
         startActivityForResult(intent, REQUEST_EXPORT);
     }
@@ -458,8 +465,10 @@ public final class MainActivity extends Activity {
                 if (output == null) throw new IOException("Output stream is unavailable.");
                 if (type == ExportType.MARKDOWN) {
                     output.write(DocumentRenderer.toMarkdown(document).getBytes(StandardCharsets.UTF_8));
-                } else {
+                } else if (type == ExportType.DOCX) {
                     DocxExporter.write(document, output);
+                } else {
+                    XlsxExporter.write(document, output);
                 }
                 runOnUiThread(() -> {
                     setBusy(false);
@@ -486,10 +495,16 @@ public final class MainActivity extends Activity {
     }
 
     private void enableResultActions(boolean enabled) {
-        copyButton.setEnabled(enabled);
-        shareButton.setEnabled(enabled);
-        markdownButton.setEnabled(enabled);
-        docxButton.setEnabled(enabled);
+        setActionEnabled(copyButton, enabled);
+        setActionEnabled(shareButton, enabled);
+        setActionEnabled(markdownButton, enabled);
+        setActionEnabled(docxButton, enabled);
+        setActionEnabled(xlsxButton, enabled);
+    }
+
+    private static void setActionEnabled(View action, boolean enabled) {
+        action.setEnabled(enabled);
+        action.setAlpha(enabled ? 1f : 0.45f);
     }
 
     private void showFailure(String message) {

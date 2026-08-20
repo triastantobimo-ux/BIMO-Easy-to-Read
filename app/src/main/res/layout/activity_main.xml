@@ -270,64 +270,195 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="86dp"
+                android:layout_height="84dp"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/bg_action_shelf"
                 android:elevation="4dp"
                 android:gravity="center"
                 android:orientation="horizontal"
-                android:padding="6dp">
+                android:padding="5dp">
 
-                <Button
+                <LinearLayout
                     android:id="@+id/buttonCopy"
-                    style="@style/Widget.EasyRead.Button.Primary"
                     android:layout_width="0dp"
-                    android:layout_height="74dp"
-                    android:layout_marginEnd="3dp"
+                    android:layout_height="72dp"
+                    android:layout_marginStart="0dp"
+                    android:layout_marginEnd="2dp"
                     android:layout_weight="1"
-                    android:drawableTop="@drawable/ic_copy"
-                    android:drawablePadding="2dp"
+                    android:background="@drawable/bg_action_primary"
+                    android:clickable="true"
+                    android:contentDescription="@string/copy"
                     android:enabled="false"
-                    android:text="@string/copy" />
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingTop="7dp"
+                    android:paddingBottom="6dp">
 
-                <Button
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="@null"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_copy" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:fontFamily="sans-serif-condensed"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="@string/copy"
+                        android:textColor="@color/accent_on_primary"
+                        android:textSize="10sp" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/buttonShare"
-                    style="@style/Widget.EasyRead.Button.Command"
                     android:layout_width="0dp"
-                    android:layout_height="74dp"
-                    android:layout_marginStart="3dp"
-                    android:layout_marginEnd="3dp"
+                    android:layout_height="72dp"
+                    android:layout_marginStart="2dp"
+                    android:layout_marginEnd="2dp"
                     android:layout_weight="1"
-                    android:drawableTop="@drawable/ic_share"
-                    android:drawablePadding="2dp"
+                    android:background="@drawable/bg_action_tile"
+                    android:clickable="true"
+                    android:contentDescription="@string/share"
                     android:enabled="false"
-                    android:text="@string/share" />
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingTop="7dp"
+                    android:paddingBottom="6dp">
 
-                <Button
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="@null"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_share" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:fontFamily="sans-serif-condensed"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="@string/share"
+                        android:textColor="@color/text_primary"
+                        android:textSize="10sp" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/buttonMarkdown"
-                    style="@style/Widget.EasyRead.Button.Command"
                     android:layout_width="0dp"
-                    android:layout_height="74dp"
-                    android:layout_marginStart="3dp"
-                    android:layout_marginEnd="3dp"
+                    android:layout_height="72dp"
+                    android:layout_marginStart="2dp"
+                    android:layout_marginEnd="2dp"
                     android:layout_weight="1"
-                    android:drawableTop="@drawable/ic_markdown"
-                    android:drawablePadding="2dp"
+                    android:background="@drawable/bg_action_tile"
+                    android:clickable="true"
+                    android:contentDescription="@string/save_markdown"
                     android:enabled="false"
-                    android:text="@string/markdown_short" />
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingTop="7dp"
+                    android:paddingBottom="6dp">
 
-                <Button
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="@null"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_markdown" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:fontFamily="sans-serif-condensed"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="@string/markdown_short"
+                        android:textColor="@color/text_primary"
+                        android:textSize="10sp" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/buttonDocx"
-                    style="@style/Widget.EasyRead.Button.Command"
                     android:layout_width="0dp"
-                    android:layout_height="74dp"
-                    android:layout_marginStart="3dp"
+                    android:layout_height="72dp"
+                    android:layout_marginStart="2dp"
+                    android:layout_marginEnd="2dp"
                     android:layout_weight="1"
-                    android:drawableTop="@drawable/ic_word"
-                    android:drawablePadding="2dp"
+                    android:background="@drawable/bg_action_tile"
+                    android:clickable="true"
+                    android:contentDescription="@string/save_docx"
                     android:enabled="false"
-                    android:text="@string/word_short" />
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingTop="7dp"
+                    android:paddingBottom="6dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="@null"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_word" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:fontFamily="sans-serif-condensed"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="@string/word_short"
+                        android:textColor="@color/text_primary"
+                        android:textSize="10sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/buttonXlsx"
+                    android:layout_width="0dp"
+                    android:layout_height="72dp"
+                    android:layout_marginStart="2dp"
+                    android:layout_marginEnd="0dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_action_tile"
+                    android:clickable="true"
+                    android:contentDescription="@string/save_xlsx"
+                    android:enabled="false"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingTop="7dp"
+                    android:paddingBottom="6dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="@null"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_excel" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:fontFamily="sans-serif-condensed"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="@string/excel_short"
+                        android:textColor="@color/text_primary"
+                        android:textSize="10sp" />
+                </LinearLayout>
             </LinearLayout>
+
         </LinearLayout>
     </FrameLayout>
 </LinearLayout>

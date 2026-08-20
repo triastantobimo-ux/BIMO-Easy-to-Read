@@ -24,8 +24,10 @@
     <string name="copy">Copy</string>
     <string name="save_markdown">Save Markdown</string>
     <string name="save_docx">Save Word</string>
+    <string name="save_xlsx">Save Excel</string>
     <string name="markdown_short">Markdown</string>
     <string name="word_short">Word</string>
+    <string name="excel_short">Excel</string>
     <string name="share">Share</string>
     <string name="copied">Result copied to the Clipboard.</string>
     <string name="copy_updated">Latest result copied.</string>
