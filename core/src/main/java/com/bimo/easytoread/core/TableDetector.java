@@ -75,6 +75,13 @@ public final class TableDetector {
                 }
             }
         }
+        if (headerRow >= 0) {
+            for (int index = headerRow + 1; index < roles.size(); index++) {
+                if (roles.get(index) == TableModel.RowRole.SUMMARY) {
+                    roles.set(index, TableModel.RowRole.DATA);
+                }
+            }
+        }
         String note = frame == null
                 ? "geometry-based table reconstruction"
                 : "spreadsheet frame, row index, multi-section, and column reconstruction";
