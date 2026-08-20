@@ -2,7 +2,7 @@
 
 ## Objective
 
-Provide seamless Android OCR with structured output, automatic Clipboard copy, Markdown/DOCX export, no ads, and no cloud OCR.
+Provide seamless Android OCR with structured output, automatic Clipboard copy, Markdown/DOCX/XLSX export, no ads, and no cloud OCR.
 
 ## Runtime flow
 
@@ -13,19 +13,20 @@ Safe image decode, sampling, EXIF rotation
         |
 Bundled OCR engine adapter
         |
-Normalized lines, boxes, confidence
+Normalized lines, word tokens, boxes, confidence
         |
 DocumentStructureEngine
         |
 Canonical DocumentModel
-        |
-Editor / Clipboard / Markdown / DOCX / Sharesheet
+        |-----------------------------|
+        |                             |
+Editor / Clipboard / Markdown / DOCX TableDetector / typed XLSX exporter
 ```
 
 ## Module boundaries
 
 - `app`: Android UI, image acquisition, platform Clipboard, storage access framework, and OCR adapter.
-- `core`: Android-independent document model, layout heuristics, renderers, and DOCX generator.
+- `core`: Android-independent document model, layout heuristics, renderers, and DOCX/XLSX generators.
 - `ocr.OcrEngine`: replaceable contract. UI and exporters do not depend directly on ML Kit.
 
 ## Current engine status
@@ -44,9 +45,16 @@ Hard gates are offline operation, zero royalty, redistribution permission, API 2
 ## Integrity controls
 
 - OCR text is never generatively rewritten.
-- Manual edits become the canonical export source.
+- Manual edits become the canonical text export source.
 - Clipboard, Markdown, and DOCX are rendered from the same model.
-- DOCX text is XML-escaped and generated as minimal OOXML.
+- XLSX export uses image geometry and word-token boxes to identify visible cells.
+- Spreadsheet row numbers, column labels, ribbon, formula bar, sheet tabs, status bar,
+  and adjacent-screen text are excluded from a detected spreadsheet frame.
+- Visible numeric values are stored as typed numbers with matching decimal, percentage,
+  Rupiah, or date number formats; identifiers remain text.
+- Formula cells are exported as their visible values. The exporter never invents formulas
+  or hidden workbook semantics that are absent from the image.
+- DOCX and XLSX text is XML-escaped and generated as minimal OOXML.
 - Export failure does not remove the editor result.
 - No user image or recognized text is logged.
 
@@ -62,10 +70,9 @@ GitHub Actions is the build and test environment. CI produces:
 - Android permission evidence;
 - unit, lint, and build reports.
 
-
 ## Layout-aware OCR pipeline
 
-Before document rendering, the bundled OCR engine now performs four-orientation evaluation
+Before document rendering, the bundled OCR engine performs four-orientation evaluation
 (0, 180, 90, and 270 degrees) and chooses the most plausible result using recognition
 confidence, readable-character ratio, word-like token ratio, and noise penalties.
 
@@ -76,6 +83,12 @@ The `ReadingOrderResolver` then classifies detected geometry into:
 - poster/freeform: prioritize visually prominent headings, then nearby content zones;
 - grid: preserve row-major top-to-bottom and left-to-right order.
 
+For XLSX export, `TableDetector` separately reconstructs cell boundaries from repeated
+row and column geometry. A spreadsheet screenshot receives an additional frame pass based
+on a stable Excel row-index sequence. This keeps cell extraction independent from the
+human-readable paragraph order used in the OCR result editor.
+
 The selected rotation and layout class are retained in the engine identifier for traceability.
 These heuristics improve reading order but do not recreate arbitrary graphic design or guarantee
 semantic interpretation of every package, poster, table, or heavily distorted photograph.
+

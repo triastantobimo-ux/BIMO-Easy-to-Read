@@ -12,6 +12,8 @@ Lightweight Android OCR with structured, editable output and automatic Clipboard
 - Automatic system Clipboard copy.
 - Plain-text and styled Clipboard representation.
 - Markdown and DOCX export.
+- Cell-aware XLSX export for photographed or captured tables, including visible decimal,
+  percentage, Rupiah, and date formats.
 - Android Sharesheet.
 - Indonesian and English interface.
 - Light, dark, and system appearance.
@@ -55,6 +57,7 @@ The **Android Signed Release** workflow then publishes signed APK/AAB files, sou
 ## Architecture and privacy
 
 - [Architecture baseline](docs/ARCHITECTURE.md)
+- [Excel export contract](docs/EXCEL_EXPORT.md)
 - [Privacy baseline](PRIVACY.md)
 - [Third-party notices](THIRD_PARTY_NOTICES.md)
 - [Delivery checkpoints](docs/DELIVERY_CHECKPOINTS.md)
@@ -62,3 +65,4 @@ The **Android Signed Release** workflow then publishes signed APK/AAB files, sou
 ## OCR quality status
 
 The bundled ML Kit engine is a CP1 functional baseline, not yet a claim of best OCR. CP2 will compare it against open-source PP-OCRv6 Small/Tiny and Tesseract using an independent Indonesian/English benchmark. The UI and exporters are isolated behind an OCR engine contract so the production engine can be replaced without rewriting the application.
+

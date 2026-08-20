@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import com.bimo.easytoread.core.Box;
 import com.bimo.easytoread.core.DetectedLine;
+import com.bimo.easytoread.core.DetectedToken;
 import com.bimo.easytoread.core.DocumentModel;
 import com.bimo.easytoread.core.DocumentStructureEngine;
 import com.bimo.easytoread.core.TextLineNoiseFilter;
@@ -20,7 +21,7 @@ import java.util.concurrent.Executors;
 
 public final class MlKitOcrEngine implements OcrEngine {
     public static final String ENGINE_ID =
-            "mlkit-latin-bundled-16.0.1-layout-aware-scene-enhanced";
+            "mlkit-latin-bundled-16.0.1-layout-aware-cell-enhanced";
     private static final int[] ROTATIONS = {0, 180, 90, 270};
 
     private final TextRecognizer recognizer =
@@ -125,10 +126,28 @@ public final class MlKitOcrEngine implements OcrEngine {
                 String cleanText = sanitize(line.getText());
                 if (cleanText.isEmpty()) continue;
 
+                List<DetectedToken> tokens = new ArrayList<>();
+                for (Text.Element element : line.getElements()) {
+                    String tokenText = sanitize(element.getText());
+                    Rect tokenRect = element.getBoundingBox();
+                    if (tokenText.isEmpty() || tokenRect == null) continue;
+                    Float tokenConfidence = element.getConfidence();
+                    tokens.add(new DetectedToken(
+                            tokenText,
+                            new Box(tokenRect.left, tokenRect.top, tokenRect.right, tokenRect.bottom),
+                            tokenConfidence == null ? -1f : tokenConfidence
+                    ));
+                }
+
                 Rect rect = line.getBoundingBox();
                 if (rect == null) rect = block.getBoundingBox();
                 Box box;
-                if (rect == null) {
+                if (rect == null && !tokens.isEmpty()) {
+                    box = tokens.get(0).getBox();
+                    for (int index = 1; index < tokens.size(); index++) {
+                        box = box.union(tokens.get(index).getBox());
+                    }
+                } else if (rect == null) {
                     box = new Box(
                             0,
                             fallbackY,
@@ -143,7 +162,8 @@ public final class MlKitOcrEngine implements OcrEngine {
                 lines.add(new DetectedLine(
                         cleanText,
                         box,
-                        confidence == null ? -1f : confidence
+                        confidence == null ? -1f : confidence,
+                        tokens
                 ));
             }
         }
@@ -257,7 +277,7 @@ public final class MlKitOcrEngine implements OcrEngine {
     }
 
     private static boolean isCommonPunctuation(char value) {
-        return ".,:;!?()[]{}'\"/\\-–—_+%#@&*=<>|•·".indexOf(value) >= 0;
+        return ".,:;!?()[]{}'\"/\\-â€“â€”_+%#@&*=<>|â€¢Â·".indexOf(value) >= 0;
     }
 
     @Override
@@ -280,3 +300,4 @@ public final class MlKitOcrEngine implements OcrEngine {
         }
     }
 }
+
