@@ -170,7 +170,9 @@ class PaddleOcrEngine(context: Context) : OcrEngine {
         val active = paddle
         paddle = null
         if (active != null) {
-            scope.launch { active.release() }
+            CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+                active.release()
+            }
         }
         scope.cancel()
     }
