@@ -407,11 +407,20 @@ public final class MainActivity extends Activity {
             resultMeta.setText(R.string.no_result_meta);
             return;
         }
-        resultMeta.setText(getString(
+        String base = getString(
                 copied ? R.string.result_meta_copied : R.string.result_meta,
                 document.getBlocks().size(),
                 document.countLines()
-        ));
+        );
+        String engineId = document.getEngineId();
+        int engineLabel = engineId.startsWith("pp-ocrv6-medium")
+                ? R.string.engine_ppocr_medium
+                : engineId.startsWith("mlkit")
+                        ? R.string.engine_mlkit_fallback
+                        : engineId.startsWith("manual-edit")
+                                ? R.string.engine_manual_edit
+                                : R.string.engine_unknown;
+        resultMeta.setText(base + getString(R.string.engine_meta, getString(engineLabel)));
     }
 
     private DocumentModel effectiveDocument() {

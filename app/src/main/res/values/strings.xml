@@ -57,4 +57,9 @@
     <string name="select_source">Sumber gambar</string>
     <string name="worksheet_detected">Tabel terdeteksi: %1$d baris × %2$d kolom.</string>
     <string name="worksheet_review_required">Tabel terdeteksi: %1$d baris × %2$d kolom. Tinjau sel berkepercayaan rendah sebelum mengandalkan hasil.</string>
+    <string name="engine_meta"> · engine: %1$s</string>
+    <string name="engine_ppocr_medium">PP-OCRv6 Medium</string>
+    <string name="engine_mlkit_fallback">ML Kit fallback</string>
+    <string name="engine_manual_edit">edit manual</string>
+    <string name="engine_unknown">tidak dikenal</string>
 </resources>
