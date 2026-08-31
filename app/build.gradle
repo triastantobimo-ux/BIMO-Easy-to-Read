@@ -72,6 +72,7 @@ android {
 dependencies {
     implementation project(':core')
     implementation project(':paddle-sdk')
+    implementation 'com.quickbirdstudios:opencv:4.5.3'
 
     // Bundled Latin OCR model: no runtime model download and no cloud OCR call.
     implementation 'com.google.mlkit:text-recognition:16.0.1'
