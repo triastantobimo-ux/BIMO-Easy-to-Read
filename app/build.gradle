@@ -10,10 +10,10 @@ android {
 
     defaultConfig {
         applicationId 'com.bimo.easytoread'
-        minSdk 26
+        minSdk 31
         targetSdk 36
-        versionCode 1
-        versionName '0.1.0-cp1'
+        versionCode 2
+        versionName '0.2.0-cp2'
         testInstrumentationRunner 'android.test.InstrumentationTestRunner'
     }
 
@@ -52,6 +52,12 @@ android {
         buildConfig true
     }
 
+    defaultConfig {
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
+    }
+
     packaging {
         resources {
             excludes += [
@@ -65,6 +71,7 @@ android {
 
 dependencies {
     implementation project(':core')
+    implementation project(':paddle-sdk')
 
     // Bundled Latin OCR model: no runtime model download and no cloud OCR call.
     implementation 'com.google.mlkit:text-recognition:16.0.1'

@@ -18,7 +18,7 @@ jobs:
   build:
     name: Build, test, and audit
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 90
 
     steps:
       - name: Checkout source
@@ -44,6 +44,12 @@ jobs:
       - name: Generate pinned Gradle Wrapper
         run: gradle wrapper --gradle-version 9.4.1
 
+      - name: Prepare pinned bundled PP-OCRv6 Medium models
+        shell: bash
+        run: |
+          chmod +x scripts/prepare-ocr-models.sh
+          scripts/prepare-ocr-models.sh
+
       - name: Build and test
         run: |
           chmod +x gradlew
@@ -53,6 +59,14 @@ jobs:
         run: |
           mkdir -p audit
           ./gradlew --no-daemon :app:dependencies             --configuration releaseRuntimeClasspath > audit/release-dependencies.txt
+
+      - name: Verify bundled OCR model packaging
+        shell: bash
+        run: |
+          unzip -l app/build/outputs/apk/debug/app-debug.apk | tee audit/apk-contents.txt
+          grep -q 'assets/models/det/inference.onnx' audit/apk-contents.txt
+          grep -q 'assets/models/rec/inference.onnx' audit/apk-contents.txt
+          grep -q 'assets/models/rec/inference.yml' audit/apk-contents.txt
 
       - name: Audit APK permissions
         shell: bash
@@ -75,7 +89,7 @@ jobs:
           cp app/build/outputs/apk/release/*.apk artifacts/
           cp app/build/outputs/bundle/release/*.aab artifacts/
           cp -r audit artifacts/audit
-          zip -qr artifacts/BIMO-Easy-to-Read-source.zip .             -x '.git/*' '.gradle/*' '*/build/*' 'artifacts/*'
+          zip -qr artifacts/BIMO-Easy-to-Read-source.zip .             -x '.git/*' '.gradle/*' '*/build/*' 'artifacts/*' 'paddle-sdk/src/main/assets/models/*.onnx'
           sha256sum artifacts/*.apk artifacts/*.aab artifacts/*.zip > artifacts/SHA256SUMS.txt
 
       - name: Upload build package

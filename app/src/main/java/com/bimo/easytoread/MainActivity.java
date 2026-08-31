@@ -28,7 +28,7 @@ import com.bimo.easytoread.core.DocumentModel;
 import com.bimo.easytoread.core.DocumentRenderer;
 import com.bimo.easytoread.core.DocxExporter;
 import com.bimo.easytoread.core.XlsxExporter;
-import com.bimo.easytoread.ocr.MlKitOcrEngine;
+import com.bimo.easytoread.ocr.PaddleOcrEngine;
 import com.bimo.easytoread.ocr.OcrEngine;
 import com.bimo.easytoread.platform.CaptureContentProvider;
 import com.bimo.easytoread.platform.ClipboardWriter;
@@ -58,7 +58,7 @@ public final class MainActivity extends Activity {
     private enum ExportType { MARKDOWN, DOCX, XLSX }
 
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
-    private final OcrEngine ocrEngine = new MlKitOcrEngine();
+    private OcrEngine ocrEngine;
 
     private View inputPanel;
     private View outputPanel;
@@ -98,6 +98,7 @@ public final class MainActivity extends Activity {
         AppPreferences.applyTheme(this);
         super.onCreate(state);
         setContentView(R.layout.activity_main);
+        ocrEngine = new PaddleOcrEngine(getApplicationContext());
         bindViews();
         bindActions();
 
@@ -380,11 +381,22 @@ public final class MainActivity extends Activity {
         }
 
         enableResultActions(true);
-        status.setText(getString(
-                R.string.document_ready,
-                document.getBlocks().size(),
-                document.countLines()
-        ));
+        if (document.getWorksheet() != null) {
+            status.setText(getString(
+                    document.getWorksheet().getVerificationStatus()
+                            == com.bimo.easytoread.core.WorksheetModel.VerificationStatus.REVIEW_REQUIRED
+                            ? R.string.worksheet_review_required
+                            : R.string.worksheet_detected,
+                    document.getWorksheet().getRowCount(),
+                    document.getWorksheet().getColumnCount()
+            ));
+        } else {
+            status.setText(getString(
+                    R.string.document_ready,
+                    document.getBlocks().size(),
+                    document.countLines()
+            ));
+        }
         updateResultMeta(document, false);
         showTab(true);
         if (AppPreferences.isAutoCopy(this)) copyResult(true);
@@ -529,7 +541,7 @@ public final class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        ocrEngine.close();
+        if (ocrEngine != null) ocrEngine.close();
         worker.shutdownNow();
         if (currentBitmap != null && !currentBitmap.isRecycled()) currentBitmap.recycle();
         super.onDestroy();

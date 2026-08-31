@@ -15,4 +15,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = 'BIMO-Easy-to-Read'
-include ':app', ':core'
+include ':app', ':core', ':paddle-sdk'

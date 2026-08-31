@@ -55,4 +55,6 @@
     <string name="privacy_note">OCR runs on this device. The app requests no internet access and sends no image or text off the device.</string>
     <string name="document_ready">OCR complete: %1$d blocks, %2$d lines.</string>
     <string name="select_source">Image source</string>
+    <string name="worksheet_detected">Table detected: %1$d rows × %2$d columns.</string>
+    <string name="worksheet_review_required">Table detected: %1$d rows × %2$d columns. Review low-confidence cells before relying on the result.</string>
 </resources>

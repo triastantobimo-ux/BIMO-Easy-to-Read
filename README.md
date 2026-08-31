@@ -1,68 +1,34 @@
 # BIMO Easy to Read
 
-Lightweight Android OCR with structured, editable output and automatic Clipboard copy.
+Offline-first Android OCR with structured text, automatic Clipboard copy, Markdown/DOCX export, and
+cell-aware XLSX export.
 
-## V1 capabilities
+## Accuracy-first CP2 build
 
-- Camera, Gallery, and Android Share input.
-- Bundled on-device Latin OCR for Indonesian and English text.
-- No runtime OCR model download.
-- Reading-order reconstruction for headings, paragraphs, and lists.
-- Editable OCR result.
-- Automatic system Clipboard copy.
-- Plain-text and styled Clipboard representation.
-- Markdown and DOCX export.
-- Cell-aware XLSX export for photographed or captured tables, including visible decimal,
-  percentage, Rupiah, and date formats.
-- Android Sharesheet.
-- Indonesian and English interface.
-- Light, dark, and system appearance.
-- No ads, analytics, telemetry, cloud OCR, or INTERNET permission.
-
-## Supported Android versions
-
-- Minimum: Android 8 / API 26.
-- Target and compile SDK: Android 16 / API 36.
+- Primary candidate: PP-OCRv6 Medium, bundled ONNX models.
+- Orientation probe and compatibility fallback: bundled ML Kit Latin OCR.
+- Wired-table reconstruction: OpenCV grid detection, geometry assignment, blank-cell preservation,
+  and selective low-confidence cell re-OCR.
+- Typed Excel values: decimal, percentage, Rupiah/IDR, date, and identifier preservation.
+- Minimum: Android 12 / API 31; arm64-v8a; reference device Xiaomi 15T Pro.
+- No runtime model download, account, ads, analytics, telemetry, cloud OCR, or Internet permission.
 
 ## Build policy
 
-This repository is built and tested only in GitHub Actions.
+Android build and validation run only in GitHub Actions. The workflow downloads official model files,
+verifies the published ONNX SHA-256 values, builds APK/AAB artifacts, runs tests and lint, audits APK
+permissions, records dependencies/model provenance, and publishes a checksummed artifact package.
 
-The **Android Cloud Build** workflow performs:
+## Evidence boundary
 
-1. JDK/Gradle/Android SDK setup on a GitHub runner.
-2. Core unit tests.
-3. Android unit tests and lint.
-4. Debug APK, release APK, and release AAB builds.
-5. Generated-APK permission audit.
-6. Dependency evidence export.
-7. Source ZIP packaging with generated Gradle Wrapper.
-8. SHA-256 generation.
+Cloud success proves compilation, tests, packaging, and declared permissions. It does not prove
+real-device PP-OCRv6 Medium operator compatibility or 100% worksheet accuracy. The production engine
+lock requires a reconciled Indonesian/English and worksheet benchmark on the Xiaomi 15T Pro.
 
-Open a workflow run and download the artifact named `BIMO-Easy-to-Read-<commit SHA>`.
+See:
 
-## Release signing
-
-Unsigned build artifacts are sufficient for technical testing but cannot be uploaded to Google Play as a production release.
-
-Configure these GitHub Actions secrets before creating a `v*` tag:
-
-- `ANDROID_KEYSTORE_BASE64`
-- `ANDROID_KEYSTORE_PASSWORD`
-- `ANDROID_KEY_ALIAS`
-- `ANDROID_KEY_PASSWORD`
-
-The **Android Signed Release** workflow then publishes signed APK/AAB files, source ZIP, permission evidence, and SHA-256 checksums to GitHub Releases.
-
-## Architecture and privacy
-
-- [Architecture baseline](docs/ARCHITECTURE.md)
-- [Excel export contract](docs/EXCEL_EXPORT.md)
-- [Privacy baseline](PRIVACY.md)
-- [Third-party notices](THIRD_PARTY_NOTICES.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Excel contract](docs/EXCEL_EXPORT.md)
+- [Model provenance](docs/MODEL_PROVENANCE.md)
+- [Privacy](PRIVACY.md)
 - [Delivery checkpoints](docs/DELIVERY_CHECKPOINTS.md)
-
-## OCR quality status
-
-The bundled ML Kit engine is a CP1 functional baseline, not yet a claim of best OCR. CP2 will compare it against open-source PP-OCRv6 Small/Tiny and Tesseract using an independent Indonesian/English benchmark. The UI and exporters are isolated behind an OCR engine contract so the production engine can be replaced without rewriting the application.
-

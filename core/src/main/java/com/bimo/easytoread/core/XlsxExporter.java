@@ -36,7 +36,9 @@ public final class XlsxExporter {
     private XlsxExporter() {}
 
     public static void write(DocumentModel document, OutputStream target) throws IOException {
-        TableModel table = TableDetector.detect(document);
+        TableModel table = document != null && document.getWorksheet() != null
+                ? document.getWorksheet().toTableModel()
+                : TableDetector.detect(document);
         List<Sheet> sheets = new ArrayList<>();
         if (table.isDetected()) {
             sheets.add(Sheet.table("Table", table));

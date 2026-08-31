@@ -2,30 +2,41 @@
 
 ## Inclusion rule
 
-When the image is identified as a spreadsheet or table, the `Table` worksheet contains only
-text recognized inside reconstructed cells. The exporter removes visible application chrome,
-including ribbon/menu text, formula bar content, Excel row numbers, column letters, sheet tabs,
-status/zoom controls, and text from an adjacent screen.
+When a wired table is detected, the app constructs a `WorksheetModel` from grid intersections and
+only exports values assigned to those cells. Page chrome, ribbon text, formula bar content, row/column
+headers outside the reconstructed grid, sheet tabs, status controls, and adjacent-screen text are not
+worksheet values.
 
-The workbook keeps title, subtitle, summary, header, data, and internal blank rows only when
-their geometry is inside the detected worksheet frame. Empty trailing worksheet rows are trimmed.
+Blank cells inside the detected topology remain blank cells; neighboring text must not shift across
+their position.
 
-## Visible value and format rules
+## Recognition and verification
 
-- Integer and decimal text is written as a numeric cell while retaining the visible decimal scale.
-- `%` values are written as numeric fractions with a percentage number format.
-- `Rp` and `IDR` values are written as numeric values with a Rupiah number format.
-- Recognized dates are written as Excel date serials with a visible date number format.
-- ID, code, number, and identifier columns remain text so leading zeroes are not lost.
-- Other text remains editable inline text.
+1. PP-OCRv6 Medium performs page-level detection and recognition.
+2. Recognized boxes are assigned to cells by geometry.
+3. A visually non-empty cell with blank or low-confidence OCR receives a bounded crop-level OCR pass.
+4. The result carries topology confidence, text confidence, and AUTOMATIC or REVIEW_REQUIRED status.
+5. VERIFIED is reserved for a future explicit cell-review action; it is never assigned automatically.
 
-## Evidence boundary
+## Visible values and formats
 
-An image contains rendered values, not the source workbook model. Formula cells therefore export
-their visible result only. Hidden rows/columns, formulas, conditional formatting rules, validation,
-named ranges, macros, comments, and exact source fonts/colors are not recoverable unless they are
-visibly represented and independently recognized.
+- Integers and localized decimals are stored as numeric values with the visible decimal scale.
+- Percentages are stored as numeric fractions with percentage formatting.
+- `Rp` and `IDR` values are stored as numeric values with Rupiah formatting.
+- Recognized dates are stored as Excel date serials with date formatting.
+- Identifier/code columns and leading-zero values remain text.
+- Formula cells export their visible rendered value only; formulas are never invented.
 
-If repeated cell geometry is not sufficiently reliable, Excel export uses a conservative one-column
-`OCR Text` fallback instead of forcing unrelated text into guessed cells.
+## Unsupported source semantics
 
+A photograph does not contain hidden rows/columns, formulas, conditional-format rules, validation,
+named ranges, macros, comments, external links, or exact source fonts. These are not recoverable
+unless visibly represented and independently recognized.
+
+## Current table coverage
+
+- Wired/grid tables: implemented.
+- Borderless/wireless tables: pending neural structure model integration.
+- Complex merged cells: pending structure/cell detector and merge reconciliation.
+- If reliable cell topology is unavailable, the exporter uses the conservative one-column OCR
+  fallback instead of fabricating cells.

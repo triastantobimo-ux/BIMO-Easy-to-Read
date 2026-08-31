@@ -57,16 +57,23 @@ public final class DocumentModel {
 
     private final String engineId;
     private final List<Block> blocks;
+    private final WorksheetModel worksheet;
 
     public DocumentModel(String engineId, List<Block> blocks) {
+        this(engineId, blocks, null);
+    }
+
+    public DocumentModel(String engineId, List<Block> blocks, WorksheetModel worksheet) {
         this.engineId = engineId == null ? "unknown" : engineId;
         this.blocks = Collections.unmodifiableList(new ArrayList<>(
                 blocks == null ? Collections.emptyList() : blocks
         ));
+        this.worksheet = worksheet;
     }
 
     public String getEngineId() { return engineId; }
     public List<Block> getBlocks() { return blocks; }
+    public WorksheetModel getWorksheet() { return worksheet; }
 
     public int countLines() {
         int count = 0;

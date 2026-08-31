@@ -1,94 +1,79 @@
-# Architecture baseline
+# Accuracy-first Android OCR architecture
 
-## Objective
+## Decision
 
-Provide seamless Android OCR with structured output, automatic Clipboard copy, Markdown/DOCX/XLSX export, no ads, and no cloud OCR.
+The CP2 primary candidate is **PP-OCRv6 Medium through ONNX Runtime Android**. The app
+bundles the detection and recognition models at build time. It performs no runtime model
+download and requests no Internet permission.
+
+Bundled ML Kit remains an orientation probe and an explicit compatibility fallback. A fallback
+result retains the ML Kit engine identifier; it must not be reported as a PP-OCRv6 result.
+
+## Reference device and support boundary
+
+- Reference device: Xiaomi 15T Pro, 12 GB RAM, arm64.
+- Minimum OS for the accuracy-first build: Android 12 / API 31.
+- Packaged ABI: arm64-v8a.
+- JDK: 17; compile/target SDK: 36.
+- Inference: FP32 ONNX Runtime CPU is the correctness baseline. NNAPI may only be enabled after
+  output-parity testing on the reference device.
 
 ## Runtime flow
 
 ```text
 Camera / Gallery / Share
         |
-Safe image decode, sampling, EXIF rotation
+Safe decode + EXIF correction
         |
-Bundled OCR engine adapter
+Bundled ML Kit orientation probe
         |
-Normalized lines, word tokens, boxes, confidence
+Physical rotation + image quality assessment
         |
-DocumentStructureEngine
-        |
-Canonical DocumentModel
-        |-----------------------------|
-        |                             |
-Editor / Clipboard / Markdown / DOCX TableDetector / typed XLSX exporter
+PP-OCRv6 Medium detection and recognition
+        |------------------------------|
+        |                              |
+Document reading order          Wired-grid projection
+        |                              |
+Canonical DocumentModel         OCR assignment per cell
+        |                              |
+Clipboard / Markdown / DOCX     Selective low-confidence cell re-OCR
+                                       |
+                                WorksheetModel + confidence status
+                                       |
+                                Typed XLSX visible-value export
 ```
 
-## Module boundaries
+## Excel integrity contract
 
-- `app`: Android UI, image acquisition, platform Clipboard, storage access framework, and OCR adapter.
-- `core`: Android-independent document model, layout heuristics, renderers, and DOCX/XLSX generators.
-- `ocr.OcrEngine`: replaceable contract. UI and exporters do not depend directly on ML Kit.
+The worksheet pipeline preserves detected row/column topology, including blank cells. Text from
+the page-level OCR pass is assigned by cell geometry; cells that contain visual ink but are blank or
+low-confidence receive a bounded second OCR pass on the cell crop.
 
-## Current engine status
+The exporter only emits visible recognized values. It does not invent formulas, hidden rows or
+columns, data validation, named ranges, macros, comments, or source workbook semantics.
 
-The CP1 build uses bundled ML Kit Latin OCR as a functional baseline. It performs on-device and requires no model download.
+A photo cannot justify a universal 100% claim. The operational target is **100% verified visible-cell
+accuracy**: a workbook can be treated as verified only after every low-confidence cell is reviewed.
+The current build exposes AUTOMATIC versus REVIEW_REQUIRED status; a dedicated cell-review editor
+and VERIFIED transition remain a required checkpoint.
 
-The production engine is not yet declared best. CP2 must benchmark:
+## Table classes
 
-1. PP-OCRv6 Small through ONNX Runtime Mobile.
-2. PP-OCRv6 Tiny.
-3. Bundled ML Kit baseline.
-4. Tesseract Indonesian/English.
+1. Wired/grid tables: implemented with OpenCV line morphology and projection.
+2. Borderless/wireless tables: requires the planned SLANeXt/PP-TableMagic path.
+3. Merged or complex cells: basic output is available, but neural structure/cell detection and merge
+   reconciliation are not yet implemented on Android.
 
-Hard gates are offline operation, zero royalty, redistribution permission, API 26 compatibility, and no runtime model download. Accuracy is then measured using CER/WER and reading-order metrics on an independent Indonesian/English corpus.
+## Model provenance and packaging
 
-## Integrity controls
+GitHub Actions downloads official PaddlePaddle ONNX artifacts during the build, verifies the published
+SHA-256 values for both large ONNX files, records model/config hashes, and embeds the models into the
+APK. The source archive excludes generated ONNX binaries and retains the reproducible preparation
+script.
 
-- OCR text is never generatively rewritten.
-- Manual edits become the canonical text export source.
-- Clipboard, Markdown, and DOCX are rendered from the same model.
-- XLSX export uses image geometry and word-token boxes to identify visible cells.
-- Spreadsheet row numbers, column labels, ribbon, formula bar, sheet tabs, status bar,
-  and adjacent-screen text are excluded from a detected spreadsheet frame.
-- Visible numeric values are stored as typed numbers with matching decimal, percentage,
-  Rupiah, or date number formats; identifiers remain text.
-- Formula cells are exported as their visible values. The exporter never invents formulas
-  or hidden workbook semantics that are absent from the image.
-- DOCX and XLSX text is XML-escaped and generated as minimal OOXML.
-- Export failure does not remove the editor result.
-- No user image or recognized text is logged.
+## Evidence levels
 
-## Cloud-only delivery
-
-GitHub Actions is the build and test environment. CI produces:
-
-- debug APK;
-- release APK/AAB, unsigned unless signing secrets are configured;
-- source ZIP with generated Gradle Wrapper;
-- SHA-256 manifest;
-- dependency report;
-- Android permission evidence;
-- unit, lint, and build reports.
-
-## Layout-aware OCR pipeline
-
-Before document rendering, the bundled OCR engine performs four-orientation evaluation
-(0, 180, 90, and 270 degrees) and chooses the most plausible result using recognition
-confidence, readable-character ratio, word-like token ratio, and noise penalties.
-
-The `ReadingOrderResolver` then classifies detected geometry into:
-
-- single-column: natural top-to-bottom order;
-- multi-column/newspaper: complete the left column top-to-bottom before moving right;
-- poster/freeform: prioritize visually prominent headings, then nearby content zones;
-- grid: preserve row-major top-to-bottom and left-to-right order.
-
-For XLSX export, `TableDetector` separately reconstructs cell boundaries from repeated
-row and column geometry. A spreadsheet screenshot receives an additional frame pass based
-on a stable Excel row-index sequence. This keeps cell extraction independent from the
-human-readable paragraph order used in the OCR result editor.
-
-The selected rotation and layout class are retained in the engine identifier for traceability.
-These heuristics improve reading order but do not recreate arbitrary graphic design or guarantee
-semantic interpretation of every package, poster, table, or heavily distorted photograph.
-
+- Cloud compile/test/lint/package success: confirms source and packaging only.
+- Xiaomi 15T Pro instrumentation: required to confirm Medium operator compatibility, latency, peak
+  memory, thermal behavior, and real image accuracy.
+- Benchmark corpus reconciliation: required before declaring PP-OCRv6 Medium the production engine.
