@@ -76,4 +76,6 @@ dependencies {
 
     // Bundled Latin OCR model: no runtime model download and no cloud OCR call.
     implementation 'com.google.mlkit:text-recognition:16.0.1'
+
+    testImplementation 'junit:junit:4.13.2'
 }
