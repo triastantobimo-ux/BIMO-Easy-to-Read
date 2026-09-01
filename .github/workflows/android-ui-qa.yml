@@ -57,7 +57,7 @@ jobs:
           api-level: 35
           arch: x86_64
           profile: pixel_6
-          target: google_apis
+          target: default
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: |
@@ -67,16 +67,22 @@ jobs:
             adb shell am force-stop com.bimo.easytoread.debug
             adb shell am start -W -n com.bimo.easytoread.debug/com.bimo.easytoread.HomeActivity
             sleep 3
+            adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' > artifacts/ui-qa/home-foreground.txt
+            grep -q 'com.bimo.easytoread' artifacts/ui-qa/home-foreground.txt
             adb exec-out screencap -p > artifacts/ui-qa/home-light.png
 
             adb shell am force-stop com.bimo.easytoread.debug
             adb shell am start -W -n com.bimo.easytoread.debug/com.bimo.easytoread.MainActivity
             sleep 3
+            adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' > artifacts/ui-qa/scan-foreground.txt
+            grep -q 'com.bimo.easytoread' artifacts/ui-qa/scan-foreground.txt
             adb exec-out screencap -p > artifacts/ui-qa/scan-light.png
 
             adb shell am force-stop com.bimo.easytoread.debug
             adb shell am start -W -n com.bimo.easytoread.debug/com.bimo.easytoread.MainActivity --es ui_qa_screen workspace
             sleep 3
+            adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' > artifacts/ui-qa/workspace-foreground.txt
+            grep -q 'com.bimo.easytoread' artifacts/ui-qa/workspace-foreground.txt
             adb exec-out screencap -p > artifacts/ui-qa/workspace-light.png
 
             python3 -m pip install --disable-pip-version-check pillow==11.3.0
