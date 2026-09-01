@@ -61,31 +61,26 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: |
-            set -eu
             mkdir -p artifacts/ui-qa
             adb install -r app/build/outputs/apk/debug/app-debug.apk
 
-            PACKAGE="com.bimo.easytoread.debug"
-            HOME_ACTIVITY="com.bimo.easytoread.HomeActivity"
-            MAIN_ACTIVITY="com.bimo.easytoread.MainActivity"
-
-            adb shell am force-stop "$PACKAGE"
-            adb shell am start -W -n "$PACKAGE/$HOME_ACTIVITY"
+            adb shell am force-stop com.bimo.easytoread.debug
+            adb shell am start -W -n com.bimo.easytoread.debug/com.bimo.easytoread.HomeActivity
             sleep 3
             adb exec-out screencap -p > artifacts/ui-qa/home-light.png
 
-            adb shell am force-stop "$PACKAGE"
-            adb shell am start -W -n "$PACKAGE/$MAIN_ACTIVITY"
+            adb shell am force-stop com.bimo.easytoread.debug
+            adb shell am start -W -n com.bimo.easytoread.debug/com.bimo.easytoread.MainActivity
             sleep 3
             adb exec-out screencap -p > artifacts/ui-qa/scan-light.png
 
-            adb shell am force-stop "$PACKAGE"
-            adb shell am start -W -n "$PACKAGE/$MAIN_ACTIVITY"               --es ui_qa_screen workspace
+            adb shell am force-stop com.bimo.easytoread.debug
+            adb shell am start -W -n com.bimo.easytoread.debug/com.bimo.easytoread.MainActivity --es ui_qa_screen workspace
             sleep 3
             adb exec-out screencap -p > artifacts/ui-qa/workspace-light.png
 
             python3 -m pip install --disable-pip-version-check pillow==11.3.0
-            python3 scripts/ui-screenshot-qa.py               --baseline-dir docs/ui-v2/baselines               --actual-dir artifacts/ui-qa               --report design-qa.md               --json-report artifacts/ui-qa/comparison.json
+            python3 scripts/ui-screenshot-qa.py --baseline-dir docs/ui-v2/baselines --actual-dir artifacts/ui-qa --report design-qa.md --json-report artifacts/ui-qa/comparison.json
             cp design-qa.md artifacts/ui-qa/design-qa.md
 
       - name: Upload UI QA evidence
