@@ -1,5 +1,6 @@
 package com.bimo.easytoread;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.Context;
@@ -27,6 +28,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.window.OnBackInvokedDispatcher;
 import com.bimo.easytoread.core.DocumentModel;
 import com.bimo.easytoread.core.DocumentRenderer;
 import com.bimo.easytoread.core.DocxExporter;
@@ -114,6 +116,7 @@ public final class MainActivity extends Activity {
         ocrEngine = new PaddleOcrEngine(getApplicationContext());
         bindViews();
         bindActions();
+        registerPredictiveBack();
 
         textScalePercent = clampTextScale(AppPreferences.getTextScale(this));
         applyTextScale();
@@ -729,13 +732,27 @@ public final class MainActivity extends Activity {
                 : message;
     }
 
-    @Override
-    public void onBackPressed() {
+    private void registerPredictiveBack() {
+        if (Build.VERSION.SDK_INT >= 33) {
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                    this::handleBackNavigation
+            );
+        }
+    }
+
+    private void handleBackNavigation() {
         if (showingOutput) {
             showTab(false);
         } else {
-            super.onBackPressed();
+            finishAfterTransition();
         }
+    }
+
+    @SuppressLint("GestureBackNavigation")
+    @Override
+    public void onBackPressed() {
+        handleBackNavigation();
     }
 
     @Override
