@@ -8,11 +8,14 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -80,6 +83,16 @@ public final class MainActivity extends Activity {
     private View markdownButton;
     private View docxButton;
     private View xlsxButton;
+    private Button modeDocument;
+    private Button modeTable;
+    private Button modeQuickText;
+    private Button modeMultiPage;
+    private Button workspaceRead;
+    private Button workspaceEdit;
+    private Button workspaceReview;
+    private View workspaceUtility;
+    private View exportShelf;
+    private TextView workspaceStatus;
 
     private DocumentModel currentDocument;
     private Bitmap currentBitmap;
@@ -118,7 +131,12 @@ public final class MainActivity extends Activity {
         } else {
             showTab(false);
         }
-        handleIncomingShare(getIntent());
+        if (BuildConfig.DEBUG
+                && "workspace".equals(getIntent().getStringExtra("ui_qa_screen"))) {
+            loadQaWorkspace();
+        } else {
+            handleIncomingShare(getIntent());
+        }
     }
 
     private void bindViews() {
@@ -142,6 +160,16 @@ public final class MainActivity extends Activity {
         markdownButton = findViewById(R.id.buttonMarkdown);
         docxButton = findViewById(R.id.buttonDocx);
         xlsxButton = findViewById(R.id.buttonXlsx);
+        modeDocument = findViewById(R.id.modeDocument);
+        modeTable = findViewById(R.id.modeTable);
+        modeQuickText = findViewById(R.id.modeQuickText);
+        modeMultiPage = findViewById(R.id.modeMultiPage);
+        workspaceRead = findViewById(R.id.workspaceRead);
+        workspaceEdit = findViewById(R.id.workspaceEdit);
+        workspaceReview = findViewById(R.id.workspaceReview);
+        workspaceUtility = findViewById(R.id.workspaceUtility);
+        exportShelf = findViewById(R.id.exportShelf);
+        workspaceStatus = findViewById(R.id.textWorkspaceStatus);
     }
 
     private void bindActions() {
@@ -160,6 +188,60 @@ public final class MainActivity extends Activity {
         docxButton.setOnClickListener(view -> requestExport(ExportType.DOCX));
         xlsxButton.setOnClickListener(view -> requestExport(ExportType.XLSX));
 
+        modeDocument.setOnClickListener(view ->
+                selectScanMode(modeDocument, R.string.scan_mode_document_selected));
+        modeTable.setOnClickListener(view ->
+                selectScanMode(modeTable, R.string.scan_mode_table_selected));
+        modeQuickText.setOnClickListener(view ->
+                selectScanMode(modeQuickText, R.string.scan_mode_quick_selected));
+        modeMultiPage.setOnClickListener(view ->
+                selectScanMode(modeMultiPage, R.string.scan_mode_multi_selected));
+
+        findViewById(R.id.buttonPrimaryCapture).setOnClickListener(view -> takePhoto());
+        findViewById(R.id.buttonOpenFile).setOnClickListener(view -> chooseImage());
+        findViewById(R.id.buttonHistory).setOnClickListener(view ->
+                startActivity(new Intent(this, HubActivity.class)
+                        .putExtra(HubActivity.EXTRA_DESTINATION, HubActivity.DESTINATION_DOCUMENTS)));
+
+        findViewById(R.id.buttonNavHome).setOnClickListener(view -> {
+            startActivity(new Intent(this, HomeActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+            finish();
+        });
+        findViewById(R.id.buttonNavDocuments).setOnClickListener(view ->
+                startActivity(new Intent(this, HubActivity.class)
+                        .putExtra(HubActivity.EXTRA_DESTINATION, HubActivity.DESTINATION_DOCUMENTS)));
+        findViewById(R.id.buttonNavScan).setOnClickListener(view -> showTab(false));
+        findViewById(R.id.buttonNavTools).setOnClickListener(view ->
+                startActivity(new Intent(this, HubActivity.class)
+                        .putExtra(HubActivity.EXTRA_DESTINATION, HubActivity.DESTINATION_TOOLS)));
+        findViewById(R.id.buttonNavSettings).setOnClickListener(view ->
+                startActivityForResult(new Intent(this, SettingsActivity.class), REQUEST_SETTINGS));
+
+        findViewById(R.id.buttonWorkspaceBack).setOnClickListener(view -> showTab(false));
+        workspaceRead.setOnClickListener(view -> selectWorkspaceMode(workspaceRead, false, false));
+        workspaceEdit.setOnClickListener(view -> selectWorkspaceMode(workspaceEdit, true, false));
+        workspaceReview.setOnClickListener(view -> selectWorkspaceMode(workspaceReview, false, true));
+        findViewById(R.id.buttonWorkspaceExport).setOnClickListener(view ->
+                exportShelf.setVisibility(exportShelf.getVisibility() == View.VISIBLE
+                        ? View.GONE : View.VISIBLE));
+        findViewById(R.id.buttonWorkspaceMore).setOnClickListener(view ->
+                exportShelf.setVisibility(exportShelf.getVisibility() == View.VISIBLE
+                        ? View.GONE : View.VISIBLE));
+        View.OnClickListener focusSearch = view -> {
+            resultEditor.requestFocus();
+            resultEditor.setSelection(0);
+        };
+        findViewById(R.id.buttonWorkspaceSearch).setOnClickListener(focusSearch);
+        findViewById(R.id.buttonWorkspaceFind).setOnClickListener(focusSearch);
+        findViewById(R.id.buttonWorkspaceThumbnail).setOnClickListener(view ->
+                Toast.makeText(this, R.string.workspace_default_meta, Toast.LENGTH_SHORT).show());
+        findViewById(R.id.buttonWorkspaceMark).setOnClickListener(view ->
+                Toast.makeText(this, R.string.bookmark, Toast.LENGTH_SHORT).show());
+
+        selectScanMode(modeDocument, R.string.no_image);
+        selectWorkspaceMode(workspaceRead, false, false);
+
         resultEditor.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence value, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence value, int start, int before, int count) {}
@@ -169,6 +251,69 @@ public final class MainActivity extends Activity {
                 enableResultActions(!value.toString().trim().isEmpty());
             }
         });
+    }
+
+    private void selectScanMode(Button selected, int announcement) {
+        Button[] modes = { modeDocument, modeTable, modeQuickText, modeMultiPage };
+        for (Button mode : modes) {
+            boolean active = mode == selected;
+            mode.setBackgroundResource(active
+                    ? R.drawable.bg_card_selected
+                    : R.drawable.bg_card);
+            mode.setTextColor(getColor(active
+                    ? R.color.accent_on_primary
+                    : R.color.text_primary));
+            mode.setSelected(active);
+        }
+        status.setText(announcement);
+    }
+
+    private void selectWorkspaceMode(Button selected, boolean editable, boolean review) {
+        Button[] tabs = { workspaceRead, workspaceEdit, workspaceReview };
+        for (Button tab : tabs) {
+            boolean active = tab == selected;
+            tab.setBackgroundResource(active
+                    ? R.drawable.bg_tab_selected
+                    : R.drawable.bg_tab_unselected);
+            tab.setTextColor(getColor(active
+                    ? R.color.accent_secondary
+                    : R.color.text_primary));
+            tab.setTypeface(Typeface.create(
+                    "sans-serif",
+                    active ? Typeface.BOLD : Typeface.NORMAL
+            ));
+            tab.setSelected(active);
+        }
+        resultEditor.setFocusable(editable);
+        resultEditor.setFocusableInTouchMode(editable);
+        resultEditor.setCursorVisible(editable);
+        workspaceUtility.setVisibility(review ? View.VISIBLE : View.GONE);
+        workspaceStatus.setText(selected == workspaceRead
+                ? R.string.workspace_read_status
+                : selected == workspaceEdit
+                        ? R.string.workspace_edit_status
+                        : R.string.workspace_review_status);
+        if (editable) resultEditor.requestFocus();
+    }
+
+    private void loadQaWorkspace() {
+        String sample = "Executive Summary\n\n"
+                + "The Audit Committee presents the key findings and conclusions "
+                + "for the current reporting period.\n\n"
+                + "Based on our review, the Company’s internal control system is "
+                + "adequate and operating effectively.\n\n"
+                + "Key Audit Update\n\n"
+                + "Area                 Focus                         Conclusion\n"
+                + "Financial Reporting  Accuracy and completeness     Satisfactory\n"
+                + "Internal Control     Operating effectiveness       Satisfactory\n"
+                + "Risk Management      Identification and mitigation Satisfactory\n"
+                + "Compliance           Regulatory and policy         Satisfactory";
+        currentDocument = DocumentModel.fromPlainText(sample);
+        resultEditor.setText(sample);
+        resultEditor.setSelection(0);
+        enableResultActions(true);
+        updateResultMeta(currentDocument, false);
+        showTab(true);
     }
 
     private void showTab(boolean output) {
@@ -200,6 +345,10 @@ public final class MainActivity extends Activity {
                 "sans-serif-condensed",
                 output ? Typeface.BOLD : Typeface.NORMAL
         ));
+        if (output) {
+            exportShelf.setVisibility(View.GONE);
+            selectWorkspaceMode(workspaceRead, false, false);
+        }
     }
 
     private void adjustTextScale(int delta) {
@@ -230,15 +379,13 @@ public final class MainActivity extends Activity {
     }
 
     private void chooseImage() {
-        Intent intent;
-        if (Build.VERSION.SDK_INT >= 33) {
-            intent = new Intent(MediaStore.ACTION_PICK_IMAGES);
-            intent.setType("image/*");
-        } else {
-            intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("image/*");
-        }
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[] {
+                "application/pdf",
+                "image/*"
+        });
         startActivityForResult(intent, REQUEST_IMAGE);
     }
 
@@ -276,7 +423,8 @@ public final class MainActivity extends Activity {
     @SuppressWarnings("deprecation")
     private void handleIncomingShare(Intent intent) {
         if (intent == null || !Intent.ACTION_SEND.equals(intent.getAction())) return;
-        if (intent.getType() == null || !intent.getType().startsWith("image/")) return;
+        String type = intent.getType();
+        if (type == null || !(type.startsWith("image/") || "application/pdf".equals(type))) return;
 
         Parcelable value;
         if (Build.VERSION.SDK_INT >= 33) {
@@ -328,13 +476,25 @@ public final class MainActivity extends Activity {
 
         worker.execute(() -> {
             try {
-                ImageLoader.Result loaded = ImageLoader.load(this, uri, 2800);
+                String mime = getContentResolver().getType(uri);
+                boolean pdf = "application/pdf".equals(mime)
+                        || uri.toString().toLowerCase(Locale.ROOT).endsWith(".pdf");
+                Bitmap bitmap;
+                boolean lowResolution;
+                if (pdf) {
+                    bitmap = renderFirstPdfPage(uri, 2800);
+                    lowResolution = bitmap.getWidth() < 960 || bitmap.getHeight() < 960;
+                } else {
+                    ImageLoader.Result loaded = ImageLoader.load(this, uri, 2800);
+                    bitmap = loaded.getBitmap();
+                    lowResolution = loaded.isLowResolution();
+                }
                 runOnUiThread(() -> {
-                    replacePreview(loaded.getBitmap());
-                    if (loaded.isLowResolution()) {
+                    replacePreview(bitmap);
+                    if (lowResolution) {
                         status.setText(R.string.low_resolution_warning);
                     }
-                    ocrEngine.recognize(loaded.getBitmap(), new OcrEngine.Callback() {
+                    ocrEngine.recognize(bitmap, new OcrEngine.Callback() {
                         @Override
                         public void onSuccess(DocumentModel document) {
                             runOnUiThread(() -> acceptDocument(document));
@@ -356,6 +516,31 @@ public final class MainActivity extends Activity {
                 });
             }
         });
+    }
+
+    private Bitmap renderFirstPdfPage(Uri uri, int maxSide) throws IOException {
+        try (ParcelFileDescriptor descriptor =
+                     getContentResolver().openFileDescriptor(uri, "r")) {
+            if (descriptor == null) throw new IOException("PDF descriptor is unavailable.");
+            try (PdfRenderer renderer = new PdfRenderer(descriptor);
+                 PdfRenderer.Page page = renderer.openPage(0)) {
+                float scale = Math.min(
+                        1f,
+                        maxSide / (float) Math.max(page.getWidth(), page.getHeight())
+                );
+                int width = Math.max(1, Math.round(page.getWidth() * scale));
+                int height = Math.max(1, Math.round(page.getHeight() * scale));
+                Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                bitmap.eraseColor(Color.WHITE);
+                page.render(
+                        bitmap,
+                        null,
+                        null,
+                        PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY
+                );
+                return bitmap;
+            }
+        }
     }
 
     private void replacePreview(Bitmap bitmap) {
@@ -398,6 +583,9 @@ public final class MainActivity extends Activity {
             ));
         }
         updateResultMeta(document, false);
+        workspaceStatus.setText(document.getWorksheet() != null
+                ? R.string.workspace_review_status
+                : R.string.workspace_ocr_status);
         showTab(true);
         if (AppPreferences.isAutoCopy(this)) copyResult(true);
     }
@@ -539,6 +727,15 @@ public final class MainActivity extends Activity {
         return message == null || message.trim().isEmpty()
                 ? "Unknown processing error"
                 : message;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (showingOutput) {
+            showTab(false);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override

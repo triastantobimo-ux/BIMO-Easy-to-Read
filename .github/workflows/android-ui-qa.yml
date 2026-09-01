@@ -1,0 +1,102 @@
+name: Android UI V2 Cloud Screenshot QA
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-ui-v2-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  screenshot-qa:
+    name: Build, navigate, capture, and compare
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle 9.4.1
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.4.1'
+
+      - name: Install Android SDK packages
+        shell: bash
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"             "platforms;android-36"             "build-tools;36.0.0"             "platform-tools"
+
+      - name: Prepare pinned OCR models
+        shell: bash
+        run: |
+          chmod +x scripts/prepare-ocr-models.sh
+          scripts/prepare-ocr-models.sh
+
+      - name: Build debug APK and navigation contract tests
+        shell: bash
+        run: |
+          gradle wrapper --gradle-version 9.4.1
+          chmod +x gradlew
+          ./gradlew --no-daemon             :app:testDebugUnitTest             :app:lintDebug             :app:assembleDebug
+
+      - name: Capture locked navigation states
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_6
+          target: google_apis
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: |
+            set -euo pipefail
+            mkdir -p artifacts/ui-qa
+            adb install -r app/build/outputs/apk/debug/app-debug.apk
+
+            PACKAGE="com.bimo.easytoread.debug"
+            HOME_ACTIVITY="com.bimo.easytoread.HomeActivity"
+            MAIN_ACTIVITY="com.bimo.easytoread.MainActivity"
+
+            adb shell am force-stop "$PACKAGE"
+            adb shell am start -W -n "$PACKAGE/$HOME_ACTIVITY"
+            sleep 3
+            adb exec-out screencap -p > artifacts/ui-qa/home-light.png
+
+            adb shell am force-stop "$PACKAGE"
+            adb shell am start -W -n "$PACKAGE/$MAIN_ACTIVITY"
+            sleep 3
+            adb exec-out screencap -p > artifacts/ui-qa/scan-light.png
+
+            adb shell am force-stop "$PACKAGE"
+            adb shell am start -W -n "$PACKAGE/$MAIN_ACTIVITY"               --es ui_qa_screen workspace
+            sleep 3
+            adb exec-out screencap -p > artifacts/ui-qa/workspace-light.png
+
+            python3 -m pip install --disable-pip-version-check pillow==11.3.0
+            python3 scripts/ui-screenshot-qa.py               --baseline-dir docs/ui-v2/baselines               --actual-dir artifacts/ui-qa               --report design-qa.md               --json-report artifacts/ui-qa/comparison.json
+            cp design-qa.md artifacts/ui-qa/design-qa.md
+
+      - name: Upload UI QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: BIMO-UI-V2-screenshot-QA-${{ github.sha }}
+          path: |
+            artifacts/ui-qa/
+            design-qa.md
+            app/build/reports/tests/
+            app/build/reports/lint-results-debug.html
+          if-no-files-found: warn
+          retention-days: 30
