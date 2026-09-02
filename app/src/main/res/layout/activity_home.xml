@@ -45,16 +45,6 @@
                     android:textStyle="bold" />
 
                 <ImageButton
-                    android:id="@+id/buttonHomeSearch"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_marginEnd="8dp"
-                    android:background="@drawable/bg_icon_button"
-                    android:contentDescription="@string/search"
-                    android:padding="12dp"
-                    android:src="@drawable/ic_search" />
-
-                <ImageButton
                     android:id="@+id/buttonHomeProfile"
                     android:layout_width="48dp"
                     android:layout_height="48dp"

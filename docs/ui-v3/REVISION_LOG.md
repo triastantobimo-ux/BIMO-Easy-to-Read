@@ -16,6 +16,9 @@ Product-owner decisions implemented:
 - Excel shortcut shown only for an unchanged structured worksheet.
 - Export Center added: format, then Save As/Open with/Bagikan file.
 - Temporary file sharing secured through the existing non-exported content provider.
+- Removed the non-functional Home search shortcut and implemented real in-result text search.
+- Replaced the unsupported document-detected claim with an honest preview-ready state; automatic
+  edge detection/crop remains a separate implementation checkpoint.
 - Development build renamed to BIMO-EasyDocs-debug-arm64.apk and remains arm64 debug only.
 
 Unchanged:

@@ -23,7 +23,6 @@ public final class HomeActivity extends Activity {
 
         findViewById(R.id.buttonOpenDocument).setOnClickListener(view -> openDocument());
         findViewById(R.id.buttonScanDocument).setOnClickListener(view -> openScan());
-        findViewById(R.id.buttonHomeSearch).setOnClickListener(view -> openHub(HubActivity.DESTINATION_DOCUMENTS));
         findViewById(R.id.buttonHomeProfile).setOnClickListener(view -> openSettings());
         findViewById(R.id.buttonNavHome).setOnClickListener(view -> { });
         findViewById(R.id.buttonNavDocuments).setOnClickListener(view -> openHub(HubActivity.DESTINATION_DOCUMENTS));

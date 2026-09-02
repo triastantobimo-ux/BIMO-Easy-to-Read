@@ -230,11 +230,7 @@ public final class MainActivity extends Activity {
         workspaceRead.setOnClickListener(view -> selectWorkspaceMode(workspaceRead, false, false));
         workspaceEdit.setOnClickListener(view -> selectWorkspaceMode(workspaceEdit, true, false));
         workspaceReview.setOnClickListener(view -> selectWorkspaceMode(workspaceReview, false, true));
-        View.OnClickListener focusSearch = view -> {
-            resultEditor.requestFocus();
-            resultEditor.setSelection(0);
-        };
-        findViewById(R.id.buttonWorkspaceSearch).setOnClickListener(focusSearch);
+        findViewById(R.id.buttonWorkspaceSearch).setOnClickListener(view -> showFindDialog());
 
         selectScanMode(modeDocument, R.string.no_image);
         selectWorkspaceMode(workspaceRead, false, false);
@@ -667,6 +663,32 @@ public final class MainActivity extends Activity {
                 .setTitle(R.string.export_format_title)
                 .setItems(labels.toArray(new String[0]),
                         (dialog, index) -> showExportDestinationMenu(types.get(index)))
+                .show();
+    }
+
+    private void showFindDialog() {
+        EditText query = new EditText(this);
+        query.setSingleLine(true);
+        query.setHint(R.string.search_query_hint);
+        int horizontal = Math.round(20 * getResources().getDisplayMetrics().density);
+        query.setPadding(horizontal, 0, horizontal, 0);
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.search)
+                .setView(query)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.search, (dialog, which) -> {
+                    String needle = query.getText().toString().trim();
+                    if (needle.isEmpty()) return;
+                    String haystack = resultEditor.getText().toString();
+                    int index = haystack.toLowerCase(Locale.ROOT)
+                            .indexOf(needle.toLowerCase(Locale.ROOT));
+                    if (index < 0) {
+                        Toast.makeText(this, R.string.search_not_found, Toast.LENGTH_SHORT).show();
+                    } else {
+                        resultEditor.setSelection(index, index + needle.length());
+                    }
+                })
                 .show();
     }
 
