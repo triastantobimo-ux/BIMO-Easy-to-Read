@@ -43,12 +43,12 @@ jobs:
           chmod +x scripts/prepare-ocr-models.sh
           scripts/prepare-ocr-models.sh
 
-      - name: Build debug APK and navigation contract tests
+      - name: Build x86_64 UI-QA APK and navigation contract tests
         shell: bash
         run: |
           gradle wrapper --gradle-version 9.4.1
           chmod +x gradlew
-          ./gradlew --no-daemon             :app:testDebugUnitTest             :app:lintDebug             :app:assembleDebug
+          ./gradlew --no-daemon -PtargetAbi=x86_64             :app:testDebugUnitTest             :app:lintDebug             :app:assembleDebug
 
       - name: Capture locked navigation states
         uses: reactivecircus/android-emulator-runner@v2

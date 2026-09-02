@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build, test, and audit
+    name: Build installable debug APK, test, and audit
     runs-on: ubuntu-latest
     timeout-minutes: 90
 
@@ -50,15 +50,15 @@ jobs:
           chmod +x scripts/prepare-ocr-models.sh
           scripts/prepare-ocr-models.sh
 
-      - name: Build and test
+      - name: Build arm64 debug APK and run tests
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon clean             :core:test             :app:testDebugUnitTest             :app:lintDebug             :app:assembleDebug             :app:assembleRelease             :app:bundleRelease
+          ./gradlew --no-daemon -PtargetAbi=arm64-v8a clean             :core:test             :app:testDebugUnitTest             :app:lintDebug             :app:assembleDebug
 
       - name: Export dependency evidence
         run: |
           mkdir -p audit
-          ./gradlew --no-daemon :app:dependencies             --configuration releaseRuntimeClasspath > audit/release-dependencies.txt
+          ./gradlew --no-daemon -PtargetAbi=arm64-v8a :app:dependencies             --configuration debugRuntimeClasspath > audit/debug-dependencies.txt
 
       - name: Verify bundled OCR model packaging
         shell: bash
@@ -68,38 +68,42 @@ jobs:
           grep -q 'assets/models/rec/inference.onnx' audit/apk-contents.txt
           grep -q 'assets/models/rec/inference.yml' audit/apk-contents.txt
 
-      - name: Audit APK permissions
+      - name: Audit debug APK permissions
         shell: bash
         run: |
           AAPT2="$ANDROID_HOME/build-tools/36.0.0/aapt2"
-          for APK in app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/*.apk; do
-            echo "=== $APK ==="
-            "$AAPT2" dump permissions "$APK"
-          done | tee audit/apk-permissions.txt
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+          "$AAPT2" dump permissions "$APK" | tee audit/apk-permissions.txt
           if grep -Eq '(android.permission.(INTERNET|ACCESS_NETWORK_STATE)|com.google.android.gms.permission.AD_ID)' audit/apk-permissions.txt; then
             echo "Forbidden network, analytics, or advertising permission detected."
             exit 1
           fi
 
-      - name: Package cloud artifacts
+      - name: Package debug APK and CI evidence
         shell: bash
         run: |
-          mkdir -p artifacts
-          cp app/build/outputs/apk/debug/app-debug.apk artifacts/BIMO-Easy-to-Read-debug.apk
-          cp app/build/outputs/apk/release/*.apk artifacts/
-          cp app/build/outputs/bundle/release/*.aab artifacts/
-          cp -r audit artifacts/audit
-          zip -qr artifacts/BIMO-Easy-to-Read-source.zip .             -x '.git/*' '.gradle/*' '*/build/*' 'artifacts/*' 'paddle-sdk/src/main/assets/models/*.onnx'
-          sha256sum artifacts/*.apk artifacts/*.aab artifacts/*.zip > artifacts/SHA256SUMS.txt
+          mkdir -p artifacts/app artifacts/evidence/audit
+          cp app/build/outputs/apk/debug/app-debug.apk             artifacts/app/BIMO-Easy-to-Read-debug-arm64.apk
+          sha256sum artifacts/app/BIMO-Easy-to-Read-debug-arm64.apk             > artifacts/app/SHA256SUMS.txt
+          cp -r audit/. artifacts/evidence/audit/
+          cp app/build/reports/lint-results-debug.html artifacts/evidence/
+          cp -r app/build/reports/tests artifacts/evidence/app-tests
+          cp -r core/build/reports/tests artifacts/evidence/core-tests
+          du -h artifacts/app/BIMO-Easy-to-Read-debug-arm64.apk             > artifacts/evidence/artifact-size.txt
 
-      - name: Upload build package
-        if: always()
+      - name: Upload installable debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: BIMO-Easy-to-Read-${{ github.sha }}
-          path: |
-            artifacts/
-            app/build/reports/
-            core/build/reports/tests/
-          if-no-files-found: warn
+          name: BIMO-Debug-APK-arm64-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/app/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
+
+      - name: Upload CI evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: BIMO-CI-Evidence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/evidence/
+          if-no-files-found: error
           retention-days: 30

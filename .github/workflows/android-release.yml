@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   release:
-    name: Build signed release in GitHub
+    name: Build signed arm64 release in GitHub
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
@@ -60,11 +60,11 @@ jobs:
           chmod +x scripts/prepare-ocr-models.sh
           scripts/prepare-ocr-models.sh
 
-      - name: Build signed APK and AAB
+      - name: Build signed arm64 APK and AAB
         run: |
           gradle wrapper --gradle-version 9.4.1
           chmod +x gradlew
-          ./gradlew --no-daemon clean :core:test :app:lintRelease :app:assembleRelease :app:bundleRelease
+          ./gradlew --no-daemon -PtargetAbi=arm64-v8a clean             :core:test             :app:lintRelease             :app:assembleRelease             :app:bundleRelease
 
       - name: Audit signed APK and package release
         shell: bash
@@ -77,8 +77,8 @@ jobs:
             echo "Forbidden network, analytics, or advertising permission detected."
             exit 1
           fi
-          cp "$APK" "release-package/BIMO-Easy-to-Read-${GITHUB_REF_NAME}.apk"
-          cp app/build/outputs/bundle/release/app-release.aab             "release-package/BIMO-Easy-to-Read-${GITHUB_REF_NAME}.aab"
+          cp "$APK" "release-package/BIMO-Easy-to-Read-${GITHUB_REF_NAME}-arm64.apk"
+          cp app/build/outputs/bundle/release/app-release.aab             "release-package/BIMO-Easy-to-Read-${GITHUB_REF_NAME}-arm64.aab"
           zip -qr "release-package/BIMO-Easy-to-Read-${GITHUB_REF_NAME}-source.zip" .             -x '.git/*' '.gradle/*' '*/build/*' 'release-package/*' 'paddle-sdk/src/main/assets/models/*.onnx'
           sha256sum release-package/*.apk release-package/*.aab release-package/*.zip             > release-package/SHA256SUMS.txt
 

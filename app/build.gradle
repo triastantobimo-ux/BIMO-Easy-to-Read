@@ -3,6 +3,11 @@ plugins {
 }
 
 def keystorePath = System.getenv('ANDROID_KEYSTORE_PATH')
+def targetAbi = (project.findProperty('targetAbi') ?: 'arm64-v8a').toString()
+def allowedTargetAbis = ['arm64-v8a', 'x86_64']
+if (!allowedTargetAbis.contains(targetAbi)) {
+    throw new GradleException("Unsupported targetAbi '${targetAbi}'. Allowed values: ${allowedTargetAbis.join(', ')}")
+}
 
 android {
     namespace 'com.bimo.easytoread'
@@ -15,6 +20,9 @@ android {
         versionCode 3
         versionName '0.3.0-ui-v2'
         testInstrumentationRunner 'android.test.InstrumentationTestRunner'
+        ndk {
+            abiFilters targetAbi
+        }
     }
 
     signingConfigs {
@@ -50,12 +58,6 @@ android {
 
     buildFeatures {
         buildConfig true
-    }
-
-    defaultConfig {
-        ndk {
-            abiFilters 'arm64-v8a', 'x86_64'
-        }
     }
 
     packaging {
