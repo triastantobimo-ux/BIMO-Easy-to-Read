@@ -1,5 +1,6 @@
 package com.bimo.easytoread;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -9,6 +10,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.widget.ImageView;
 
+@SuppressLint("AppCompatCustomView")
 public final class ZoomImageView extends ImageView {
     private final Matrix imageMatrix = new Matrix();
     private final ScaleGestureDetector scaleDetector;
@@ -89,3 +91,4 @@ public final class ZoomImageView extends ImageView {
         setImageMatrix(imageMatrix);
     }
 }
+
