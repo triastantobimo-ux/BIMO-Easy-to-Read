@@ -22,7 +22,8 @@ public final class PdfImageAssembler {
     public static void write(Context context, List<Uri> pages, OutputStream output)
             throws IOException {
         if (pages == null || pages.isEmpty()) throw new IOException("No scan pages selected.");
-        try (PdfDocument document = new PdfDocument()) {
+        PdfDocument document = new PdfDocument();
+        try {
             Paint bitmapPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
             for (int index = 0; index < pages.size(); index++) {
                 ImageLoader.Result loaded = ImageLoader.load(context, pages.get(index), 2800);
@@ -52,6 +53,8 @@ public final class PdfImageAssembler {
                 }
             }
             document.writeTo(output);
+        } finally {
+            document.close();
         }
     }
 
@@ -74,3 +77,4 @@ public final class PdfImageAssembler {
         return new RectF(left, top, left + width, top + height);
     }
 }
+
