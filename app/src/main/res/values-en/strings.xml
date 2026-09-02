@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">BIMO Easy to Read</string>
-    <string name="app_icon">BIMO Easy to Read icon</string>
-    <string name="app_tagline">On-device OCR. Ready to paste.</string>
+    <string name="app_name">BIMO EasyDocs</string>
+    <string name="app_icon">BIMO EasyDocs icon</string>
+    <string name="app_tagline">Scan, read, edit, and export documents with ease.</string>
     <string name="tab_input">Scan</string>
     <string name="tab_output">OCR result</string>
     <string name="input_instruction">Choose an image, take a photo, or share an image to this app.</string>
@@ -29,6 +29,7 @@
     <string name="word_short">Word</string>
     <string name="excel_short">Excel</string>
     <string name="share">Share</string>
+    <string name="file">File</string>
     <string name="copied">Result copied to the Clipboard.</string>
     <string name="copy_updated">Latest result copied.</string>
     <string name="ocr_failed">OCR failed: %1$s</string>
@@ -64,12 +65,15 @@
     <string name="engine_unknown">unknown</string>
 
     <string name="home_question">What would you like\nto work on?</string>
+    <string name="quick_actions">Quick actions</string>
     <string name="open_document">Open document</string>
     <string name="scan_document">Scan document</string>
     <string name="home_supported_types">PDF, image, document, and table</string>
     <string name="recently_opened">Recently opened</string>
     <string name="view_all">View all ›</string>
     <string name="continue_work">Continue working</string>
+    <string name="recent_empty_title">No recent documents yet</string>
+    <string name="recent_empty_message">Documents you open or scan will appear here.</string>
     <string name="cells_need_review">●  3 cells need review  ›</string>
     <string name="search">Search</string>
     <string name="history">History</string>
@@ -79,6 +83,7 @@
     <string name="nav_documents">Documents</string>
     <string name="nav_scan">Scan</string>
     <string name="nav_tools">Tools</string>
+    <string name="nav_activity">Activity</string>
     <string name="nav_settings">Settings</string>
     <string name="choose_scan_type">Choose scan type</string>
     <string name="automatic_mode_note">Automatic mode will choose the best settings.</string>
@@ -88,8 +93,8 @@
     <string name="mode_multi_page">Multiple pages\nScan many pages</string>
     <string name="document_detection_ready">Document detected</string>
     <string name="gallery">Gallery</string>
-    <string name="system_camera">System camera</string>
-    <string name="start_scan">Start scanning</string>
+    <string name="system_camera">Camera</string>
+    <string name="start_scan">Take photo</string>
     <string name="open_pdf_or_image">Open PDF or image  ›</string>
     <string name="workspace_default_title">Scan result</string>
     <string name="workspace_default_meta">1 page · Local</string>
@@ -100,6 +105,13 @@
     <string name="thumbnail">Thumbnail</string>
     <string name="bookmark">Bookmark</string>
     <string name="export">Export</string>
+    <string name="documents_intro">Files remain in their original location. Use the Android file picker to open local or cloud documents.</string>
+    <string name="documents_primary">Open document</string>
+    <string name="tools_intro">Choose the result you need. Tools only show functions that are currently available.</string>
+    <string name="tools_primary">Scan or open a source</string>
+    <string name="tools_available">Available now\n\nDocument and image OCR\nTable extraction to Excel\nMarkdown and Word export\nPDF reading with OCR</string>
+    <string name="activity_intro">Processing and export history will appear here after you complete work.</string>
+    <string name="activity_empty">No activity yet</string>
     <string name="documents_hierarchy">Recent documents\n\n• PDFs and documents\n• Images\n• OCR results\n• Spreadsheets\n• Cloud providers available on device</string>
     <string name="tools_hierarchy">Convert\n• PDF to Word, Excel, image, and text\n• Document or image to PDF\n\nOrganize\n• Merge, split, reorder, rotate\n\nOptimize\n• Compress and enhance\n\nFind and Extract\n• Batch search and OCR\n\nSecure and Sign\n• Protect, redact, and digital sign</string>
     <string name="continue_action">Continue</string>
@@ -110,5 +122,14 @@
     <string name="workspace_read_status">Read mode: text can be selected and copied.</string>
     <string name="workspace_edit_status">Edit mode: text can be edited by block.</string>
     <string name="workspace_review_status">Review mode: inspect OCR, formatting, and low-confidence cells.</string>
+    <string name="export_format_title">Choose export format</string>
+    <string name="export_destination_title">Send result to</string>
+    <string name="export_save_as">Save As</string>
+    <string name="export_open_with">Open with</string>
+    <string name="export_share_file">Share file</string>
+    <string name="export_prepare">Preparing file...</string>
+    <string name="export_no_app">No app can open this format.</string>
+    <string name="excel_table_only">Excel is available when a table is detected.</string>
+    <string name="more_actions">More actions</string>
 
 </resources>

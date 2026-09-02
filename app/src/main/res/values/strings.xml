@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">BIMO Easy to Read</string>
-    <string name="app_icon">Ikon BIMO Easy to Read</string>
-    <string name="app_tagline">OCR lokal. Hasil langsung siap ditempel.</string>
+    <string name="app_name">BIMO EasyDocs</string>
+    <string name="app_icon">Ikon BIMO EasyDocs</string>
+    <string name="app_tagline">Pindai, baca, edit, dan export dokumen dengan mudah.</string>
     <string name="tab_input">Pindai</string>
     <string name="tab_output">Hasil OCR</string>
     <string name="input_instruction">Pilih gambar, ambil foto, atau bagikan gambar ke aplikasi ini.</string>
@@ -29,6 +29,7 @@
     <string name="word_short">Word</string>
     <string name="excel_short">Excel</string>
     <string name="share">Bagikan</string>
+    <string name="file">File</string>
     <string name="copied">Hasil disalin ke Clipboard.</string>
     <string name="copy_updated">Hasil terbaru disalin.</string>
     <string name="ocr_failed">OCR gagal: %1$s</string>
@@ -64,12 +65,15 @@
     <string name="engine_unknown">tidak dikenal</string>
 
     <string name="home_question">Apa yang ingin\nAnda kerjakan?</string>
+    <string name="quick_actions">Aksi cepat</string>
     <string name="open_document">Buka dokumen</string>
     <string name="scan_document">Pindai dokumen</string>
     <string name="home_supported_types">PDF, gambar, dokumen, dan tabel</string>
     <string name="recently_opened">Terakhir dibuka</string>
     <string name="view_all">Lihat semua ›</string>
     <string name="continue_work">Lanjutkan pekerjaan</string>
+    <string name="recent_empty_title">Belum ada dokumen terbaru</string>
+    <string name="recent_empty_message">Dokumen yang Anda buka atau pindai akan muncul di sini.</string>
     <string name="cells_need_review">●  3 sel perlu diperiksa  ›</string>
     <string name="search">Cari</string>
     <string name="history">Riwayat</string>
@@ -78,7 +82,8 @@
     <string name="nav_home">Beranda</string>
     <string name="nav_documents">Dokumen</string>
     <string name="nav_scan">Pindai</string>
-    <string name="nav_tools">Tools</string>
+    <string name="nav_tools">Alat</string>
+    <string name="nav_activity">Aktivitas</string>
     <string name="nav_settings">Pengaturan</string>
     <string name="choose_scan_type">Pilih jenis pemindaian</string>
     <string name="automatic_mode_note">Mode otomatis akan memilih pengaturan terbaik.</string>
@@ -88,8 +93,8 @@
     <string name="mode_multi_page">Beberapa halaman\nPindai banyak halaman</string>
     <string name="document_detection_ready">Dokumen terdeteksi</string>
     <string name="gallery">Galeri</string>
-    <string name="system_camera">Kamera sistem</string>
-    <string name="start_scan">Mulai pemindaian</string>
+    <string name="system_camera">Kamera</string>
+    <string name="start_scan">Ambil foto</string>
     <string name="open_pdf_or_image">Buka PDF atau gambar  ›</string>
     <string name="workspace_default_title">Hasil pemindaian</string>
     <string name="workspace_default_meta">1 halaman · Lokal</string>
@@ -100,6 +105,13 @@
     <string name="thumbnail">Thumbnail</string>
     <string name="bookmark">Tandai</string>
     <string name="export">Export</string>
+    <string name="documents_intro">File tetap berada di lokasi asal. Gunakan pemilih file Android untuk membuka dokumen lokal atau cloud.</string>
+    <string name="documents_primary">Buka dokumen</string>
+    <string name="tools_intro">Pilih hasil yang ingin dibuat. Alat hanya menampilkan fungsi yang sudah tersedia.</string>
+    <string name="tools_primary">Pindai atau buka sumber</string>
+    <string name="tools_available">Tersedia sekarang\n\nOCR dokumen dan gambar\nEkstraksi tabel ke Excel\nExport Markdown dan Word\nPembacaan PDF dengan OCR</string>
+    <string name="activity_intro">Riwayat pemrosesan dan export akan muncul di sini setelah Anda menyelesaikan pekerjaan.</string>
+    <string name="activity_empty">Belum ada aktivitas</string>
     <string name="documents_hierarchy">Dokumen terbaru\n\n• PDF dan dokumen\n• Gambar\n• Hasil OCR\n• Spreadsheet\n• Cloud provider pada perangkat</string>
     <string name="tools_hierarchy">Convert\n• PDF ke Word, Excel, gambar, dan teks\n• Dokumen atau gambar ke PDF\n\nOrganize\n• Merge, split, reorder, rotate\n\nOptimize\n• Compress dan enhance\n\nFind and Extract\n• Pencarian batch dan OCR\n\nSecure and Sign\n• Proteksi, redact, dan digital sign</string>
     <string name="continue_action">Lanjutkan</string>
@@ -110,5 +122,14 @@
     <string name="workspace_read_status">Mode Baca: teks dapat dipilih dan disalin.</string>
     <string name="workspace_edit_status">Mode Edit: teks dapat diubah per blok.</string>
     <string name="workspace_review_status">Mode Review: periksa OCR, format, dan sel berkepercayaan rendah.</string>
+    <string name="export_format_title">Pilih format export</string>
+    <string name="export_destination_title">Kirim hasil ke</string>
+    <string name="export_save_as">Save As</string>
+    <string name="export_open_with">Open with</string>
+    <string name="export_share_file">Bagikan file</string>
+    <string name="export_prepare">Menyiapkan file...</string>
+    <string name="export_no_app">Tidak ada aplikasi yang dapat membuka format ini.</string>
+    <string name="excel_table_only">Excel tersedia ketika tabel terdeteksi.</string>
+    <string name="more_actions">Aksi lainnya</string>
 
 </resources>

@@ -8,6 +8,17 @@ import org.junit.Test;
 
 public final class NavigationContractTest {
     @Test
+    public void preservesFiveItemGlobalNavigationWithScanCentered() {
+        assertArrayEquals(new String[] {
+                "Beranda",
+                "Dokumen",
+                "Pindai",
+                "Alat",
+                "Aktivitas"
+        }, NavigationContract.globalNavigation());
+    }
+
+    @Test
     public void preservesLockedScanModeOrder() {
         assertArrayEquals(new String[] {
                 "Dokumen",
@@ -22,6 +33,18 @@ public final class NavigationContractTest {
         assertArrayEquals(
                 new String[] { "Baca", "Edit", "Review" },
                 NavigationContract.workspaceTabs()
+        );
+    }
+
+    @Test
+    public void workspaceActionsAreAdaptiveWithoutDuplicateExportControls() {
+        assertArrayEquals(
+                new String[] { "Salin", "Bagikan", "Export" },
+                NavigationContract.workspaceActions(false)
+        );
+        assertArrayEquals(
+                new String[] { "Salin", "Bagikan", "Export", "Excel" },
+                NavigationContract.workspaceActions(true)
         );
     }
 

@@ -36,8 +36,8 @@
         android:text="@string/nav_tools" />
 
     <Button
-        android:id="@+id/buttonNavSettings"
+        android:id="@+id/buttonNavActivity"
         style="@style/Widget.EasyRead.Nav"
-        android:drawableTop="@drawable/ic_settings"
-        android:text="@string/nav_settings" />
+        android:drawableTop="@drawable/ic_history"
+        android:text="@string/nav_activity" />
 </LinearLayout>

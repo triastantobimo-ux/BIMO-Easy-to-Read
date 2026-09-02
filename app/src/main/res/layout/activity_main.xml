@@ -174,6 +174,7 @@
                         android:scaleType="centerCrop" />
 
                     <TextView
+                        android:id="@+id/detectionBadge"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
                         android:layout_gravity="top|center_horizontal"
@@ -187,9 +188,11 @@
                         android:text="@string/document_detection_ready"
                         android:textColor="@color/accent_secondary"
                         android:textSize="14sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:visibility="gone" />
 
                     <View
+                        android:id="@+id/cropFrame"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_gravity="center"
@@ -197,7 +200,8 @@
                         android:layout_marginTop="54dp"
                         android:layout_marginEnd="40dp"
                         android:layout_marginBottom="34dp"
-                        android:background="@drawable/bg_crop_frame" />
+                        android:background="@drawable/bg_crop_frame"
+                        android:visibility="gone" />
                 </FrameLayout>
 
                 <TextView
@@ -245,18 +249,11 @@
                         android:src="@drawable/ic_brand_scanner" />
 
                     <Button
-                        android:id="@+id/buttonCamera"
+                        android:id="@+id/buttonFile"
                         style="@style/Widget.EasyRead.CaptureSide"
-                        android:drawableTop="@drawable/ic_camera"
-                        android:text="@string/system_camera" />
+                        android:drawableTop="@drawable/ic_folder"
+                        android:text="@string/file" />
                 </LinearLayout>
-
-                <Button
-                    android:id="@+id/buttonOpenFile"
-                    style="@style/Widget.EasyRead.Link"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:text="@string/open_pdf_or_image" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -343,14 +340,6 @@
                 android:padding="11dp"
                 android:src="@drawable/ic_search" />
 
-            <ImageButton
-                android:id="@+id/buttonWorkspaceMore"
-                android:layout_width="40dp"
-                android:layout_height="46dp"
-                android:background="@android:color/transparent"
-                android:contentDescription="@string/more"
-                android:padding="12dp"
-                android:src="@drawable/ic_more" />
         </LinearLayout>
 
         <LinearLayout
@@ -481,54 +470,7 @@
             android:textSize="13sp" />
 
         <LinearLayout
-            android:id="@+id/exportShelf"
-            android:layout_width="match_parent"
-            android:layout_height="68dp"
-            android:layout_marginStart="14dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="14dp"
-            android:background="@drawable/bg_action_shelf"
-            android:orientation="horizontal"
-            android:padding="4dp"
-            android:visibility="gone">
-
-            <Button
-                android:id="@+id/buttonCopy"
-                style="@style/Widget.EasyRead.ExportAction.Primary"
-                android:drawableTop="@drawable/ic_copy"
-                android:enabled="false"
-                android:text="@string/copy" />
-
-            <Button
-                android:id="@+id/buttonShare"
-                style="@style/Widget.EasyRead.ExportAction"
-                android:drawableTop="@drawable/ic_share"
-                android:enabled="false"
-                android:text="@string/share" />
-
-            <Button
-                android:id="@+id/buttonMarkdown"
-                style="@style/Widget.EasyRead.ExportAction"
-                android:drawableTop="@drawable/ic_markdown"
-                android:enabled="false"
-                android:text="@string/markdown_short" />
-
-            <Button
-                android:id="@+id/buttonDocx"
-                style="@style/Widget.EasyRead.ExportAction"
-                android:drawableTop="@drawable/ic_word"
-                android:enabled="false"
-                android:text="@string/word_short" />
-
-            <Button
-                android:id="@+id/buttonXlsx"
-                style="@style/Widget.EasyRead.ExportAction"
-                android:drawableTop="@drawable/ic_excel"
-                android:enabled="false"
-                android:text="@string/excel_short" />
-        </LinearLayout>
-
-        <LinearLayout
+            android:id="@+id/workspaceActionBar"
             android:layout_width="match_parent"
             android:layout_height="78dp"
             android:layout_marginStart="14dp"
@@ -541,28 +483,33 @@
             android:padding="4dp">
 
             <Button
-                android:id="@+id/buttonWorkspaceThumbnail"
-                style="@style/Widget.EasyRead.WorkspaceAction"
-                android:drawableTop="@drawable/ic_grid"
-                android:text="@string/thumbnail" />
+                android:id="@+id/buttonCopy"
+                style="@style/Widget.EasyRead.WorkspaceAction.Primary"
+                android:drawableTop="@drawable/ic_copy"
+                android:enabled="false"
+                android:text="@string/copy" />
 
             <Button
-                android:id="@+id/buttonWorkspaceFind"
+                android:id="@+id/buttonShare"
                 style="@style/Widget.EasyRead.WorkspaceAction"
-                android:drawableTop="@drawable/ic_search"
-                android:text="@string/search" />
-
-            <Button
-                android:id="@+id/buttonWorkspaceMark"
-                style="@style/Widget.EasyRead.WorkspaceAction"
-                android:drawableTop="@drawable/ic_bookmark"
-                android:text="@string/bookmark" />
+                android:drawableTop="@drawable/ic_share"
+                android:enabled="false"
+                android:text="@string/share" />
 
             <Button
                 android:id="@+id/buttonWorkspaceExport"
-                style="@style/Widget.EasyRead.WorkspaceAction.Primary"
+                style="@style/Widget.EasyRead.WorkspaceAction"
                 android:drawableTop="@drawable/ic_export"
+                android:enabled="false"
                 android:text="@string/export" />
+
+            <Button
+                android:id="@+id/buttonXlsx"
+                style="@style/Widget.EasyRead.WorkspaceAction.Excel"
+                android:drawableTop="@drawable/ic_excel"
+                android:enabled="false"
+                android:text="@string/excel_short"
+                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
 </FrameLayout>

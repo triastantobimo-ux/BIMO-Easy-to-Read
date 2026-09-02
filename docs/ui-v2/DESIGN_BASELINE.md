@@ -1,5 +1,8 @@
 # BIMO Easy to Read — Locked UI/UX Baseline V2
 
+> Historical baseline. Product-owner changes dated 2 September 2026 supersede conflicting
+> navigation and Workspace-action rules. See `../ui-v3/LOCKED_UI_UX_CONTRACT.md`.
+
 Status: **LOCKED BY PRODUCT OWNER**  
 Effective date: 1 September 2026  
 Scope: Android all-in-one document intelligence successor UI  

@@ -2,6 +2,8 @@ package com.bimo.easytoread;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
@@ -42,6 +44,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -61,6 +64,7 @@ public final class MainActivity extends Activity {
     private static final float BASE_TEXT_SIZE_SP = 18f;
 
     private enum ExportType { MARKDOWN, DOCX, XLSX }
+    private enum ExportDestination { SAVE_AS, OPEN_WITH, SHARE_FILE }
 
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private OcrEngine ocrEngine;
@@ -77,13 +81,13 @@ public final class MainActivity extends Activity {
     private ProgressBar progress;
     private EditText resultEditor;
     private Button galleryButton;
-    private Button cameraButton;
+    private Button fileButton;
+    private View primaryCaptureButton;
     private Button textSmallerButton;
     private Button textLargerButton;
     private View copyButton;
     private View shareButton;
-    private View markdownButton;
-    private View docxButton;
+    private View exportButton;
     private View xlsxButton;
     private Button modeDocument;
     private Button modeTable;
@@ -93,8 +97,9 @@ public final class MainActivity extends Activity {
     private Button workspaceEdit;
     private Button workspaceReview;
     private View workspaceUtility;
-    private View exportShelf;
     private TextView workspaceStatus;
+    private View detectionBadge;
+    private View cropFrame;
 
     private DocumentModel currentDocument;
     private Bitmap currentBitmap;
@@ -154,14 +159,14 @@ public final class MainActivity extends Activity {
         progress = findViewById(R.id.progress);
         resultEditor = findViewById(R.id.editResult);
         galleryButton = findViewById(R.id.buttonGallery);
-        cameraButton = findViewById(R.id.buttonCamera);
+        fileButton = findViewById(R.id.buttonFile);
+        primaryCaptureButton = findViewById(R.id.buttonPrimaryCapture);
         settingsButton = findViewById(R.id.buttonSettings);
         textSmallerButton = findViewById(R.id.buttonTextSmaller);
         textLargerButton = findViewById(R.id.buttonTextLarger);
         copyButton = findViewById(R.id.buttonCopy);
         shareButton = findViewById(R.id.buttonShare);
-        markdownButton = findViewById(R.id.buttonMarkdown);
-        docxButton = findViewById(R.id.buttonDocx);
+        exportButton = findViewById(R.id.buttonWorkspaceExport);
         xlsxButton = findViewById(R.id.buttonXlsx);
         modeDocument = findViewById(R.id.modeDocument);
         modeTable = findViewById(R.id.modeTable);
@@ -171,15 +176,17 @@ public final class MainActivity extends Activity {
         workspaceEdit = findViewById(R.id.workspaceEdit);
         workspaceReview = findViewById(R.id.workspaceReview);
         workspaceUtility = findViewById(R.id.workspaceUtility);
-        exportShelf = findViewById(R.id.exportShelf);
         workspaceStatus = findViewById(R.id.textWorkspaceStatus);
+        detectionBadge = findViewById(R.id.detectionBadge);
+        cropFrame = findViewById(R.id.cropFrame);
     }
 
     private void bindActions() {
         tabInput.setOnClickListener(view -> showTab(false));
         tabOutput.setOnClickListener(view -> showTab(true));
-        galleryButton.setOnClickListener(view -> chooseImage());
-        cameraButton.setOnClickListener(view -> takePhoto());
+        galleryButton.setOnClickListener(view -> chooseImageOnly());
+        fileButton.setOnClickListener(view -> chooseFile());
+        primaryCaptureButton.setOnClickListener(view -> takePhoto());
         settingsButton.setOnClickListener(
                 view -> startActivityForResult(new Intent(this, SettingsActivity.class), REQUEST_SETTINGS)
         );
@@ -187,9 +194,8 @@ public final class MainActivity extends Activity {
         textLargerButton.setOnClickListener(view -> adjustTextScale(TEXT_SCALE_STEP));
         copyButton.setOnClickListener(view -> copyResult(false));
         shareButton.setOnClickListener(view -> shareResult());
-        markdownButton.setOnClickListener(view -> requestExport(ExportType.MARKDOWN));
-        docxButton.setOnClickListener(view -> requestExport(ExportType.DOCX));
-        xlsxButton.setOnClickListener(view -> requestExport(ExportType.XLSX));
+        exportButton.setOnClickListener(view -> showExportFormatMenu());
+        xlsxButton.setOnClickListener(view -> showExportDestinationMenu(ExportType.XLSX));
 
         modeDocument.setOnClickListener(view ->
                 selectScanMode(modeDocument, R.string.scan_mode_document_selected));
@@ -200,11 +206,9 @@ public final class MainActivity extends Activity {
         modeMultiPage.setOnClickListener(view ->
                 selectScanMode(modeMultiPage, R.string.scan_mode_multi_selected));
 
-        findViewById(R.id.buttonPrimaryCapture).setOnClickListener(view -> takePhoto());
-        findViewById(R.id.buttonOpenFile).setOnClickListener(view -> chooseImage());
         findViewById(R.id.buttonHistory).setOnClickListener(view ->
                 startActivity(new Intent(this, HubActivity.class)
-                        .putExtra(HubActivity.EXTRA_DESTINATION, HubActivity.DESTINATION_DOCUMENTS)));
+                        .putExtra(HubActivity.EXTRA_DESTINATION, HubActivity.DESTINATION_ACTIVITY)));
 
         findViewById(R.id.buttonNavHome).setOnClickListener(view -> {
             startActivity(new Intent(this, HomeActivity.class)
@@ -218,29 +222,19 @@ public final class MainActivity extends Activity {
         findViewById(R.id.buttonNavTools).setOnClickListener(view ->
                 startActivity(new Intent(this, HubActivity.class)
                         .putExtra(HubActivity.EXTRA_DESTINATION, HubActivity.DESTINATION_TOOLS)));
-        findViewById(R.id.buttonNavSettings).setOnClickListener(view ->
-                startActivityForResult(new Intent(this, SettingsActivity.class), REQUEST_SETTINGS));
+        findViewById(R.id.buttonNavActivity).setOnClickListener(view ->
+                startActivity(new Intent(this, HubActivity.class)
+                        .putExtra(HubActivity.EXTRA_DESTINATION, HubActivity.DESTINATION_ACTIVITY)));
 
         findViewById(R.id.buttonWorkspaceBack).setOnClickListener(view -> showTab(false));
         workspaceRead.setOnClickListener(view -> selectWorkspaceMode(workspaceRead, false, false));
         workspaceEdit.setOnClickListener(view -> selectWorkspaceMode(workspaceEdit, true, false));
         workspaceReview.setOnClickListener(view -> selectWorkspaceMode(workspaceReview, false, true));
-        findViewById(R.id.buttonWorkspaceExport).setOnClickListener(view ->
-                exportShelf.setVisibility(exportShelf.getVisibility() == View.VISIBLE
-                        ? View.GONE : View.VISIBLE));
-        findViewById(R.id.buttonWorkspaceMore).setOnClickListener(view ->
-                exportShelf.setVisibility(exportShelf.getVisibility() == View.VISIBLE
-                        ? View.GONE : View.VISIBLE));
         View.OnClickListener focusSearch = view -> {
             resultEditor.requestFocus();
             resultEditor.setSelection(0);
         };
         findViewById(R.id.buttonWorkspaceSearch).setOnClickListener(focusSearch);
-        findViewById(R.id.buttonWorkspaceFind).setOnClickListener(focusSearch);
-        findViewById(R.id.buttonWorkspaceThumbnail).setOnClickListener(view ->
-                Toast.makeText(this, R.string.workspace_default_meta, Toast.LENGTH_SHORT).show());
-        findViewById(R.id.buttonWorkspaceMark).setOnClickListener(view ->
-                Toast.makeText(this, R.string.bookmark, Toast.LENGTH_SHORT).show());
 
         selectScanMode(modeDocument, R.string.no_image);
         selectWorkspaceMode(workspaceRead, false, false);
@@ -348,10 +342,7 @@ public final class MainActivity extends Activity {
                 "sans-serif-condensed",
                 output ? Typeface.BOLD : Typeface.NORMAL
         ));
-        if (output) {
-            exportShelf.setVisibility(View.GONE);
-            selectWorkspaceMode(workspaceRead, false, false);
-        }
+        if (output) selectWorkspaceMode(workspaceRead, false, false);
     }
 
     private void adjustTextScale(int delta) {
@@ -381,7 +372,14 @@ public final class MainActivity extends Activity {
         return Math.max(MIN_TEXT_SCALE, Math.min(MAX_TEXT_SCALE, value));
     }
 
-    private void chooseImage() {
+    private void chooseImageOnly() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("image/*");
+        startActivityForResult(intent, REQUEST_IMAGE);
+    }
+
+    private void chooseFile() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("*/*");
@@ -550,6 +548,8 @@ public final class MainActivity extends Activity {
         Bitmap old = currentBitmap;
         currentBitmap = bitmap;
         imagePreview.setImageBitmap(bitmap);
+        detectionBadge.setVisibility(View.VISIBLE);
+        cropFrame.setVisibility(View.VISIBLE);
         if (old != null && old != bitmap && !old.isRecycled()) old.recycle();
     }
 
@@ -648,24 +648,118 @@ public final class MainActivity extends Activity {
         startActivity(Intent.createChooser(intent, getString(R.string.share_chooser)));
     }
 
+    private void showExportFormatMenu() {
+        DocumentModel document = effectiveDocument();
+        if (document.toPlainText().isEmpty()) return;
+
+        ArrayList<ExportType> types = new ArrayList<>();
+        ArrayList<String> labels = new ArrayList<>();
+        types.add(ExportType.MARKDOWN);
+        labels.add(getString(R.string.markdown_short));
+        types.add(ExportType.DOCX);
+        labels.add(getString(R.string.word_short));
+        if (document.getWorksheet() != null) {
+            types.add(ExportType.XLSX);
+            labels.add(getString(R.string.excel_short));
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.export_format_title)
+                .setItems(labels.toArray(new String[0]),
+                        (dialog, index) -> showExportDestinationMenu(types.get(index)))
+                .show();
+    }
+
+    private void showExportDestinationMenu(ExportType type) {
+        DocumentModel document = effectiveDocument();
+        if (document.toPlainText().isEmpty()) return;
+        if (type == ExportType.XLSX && document.getWorksheet() == null) {
+            Toast.makeText(this, R.string.excel_table_only, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String[] destinations = {
+                getString(R.string.export_save_as),
+                getString(R.string.export_open_with),
+                getString(R.string.export_share_file)
+        };
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.export_destination_title)
+                .setItems(destinations, (dialog, index) -> {
+                    ExportDestination destination = ExportDestination.values()[index];
+                    if (destination == ExportDestination.SAVE_AS) requestExport(type);
+                    else prepareExport(type, destination);
+                })
+                .show();
+    }
+
+    private void prepareExport(ExportType type, ExportDestination destination) {
+        DocumentModel document = effectiveDocument();
+        if (document.toPlainText().isEmpty()) return;
+        setBusy(true);
+        Toast.makeText(this, R.string.export_prepare, Toast.LENGTH_SHORT).show();
+
+        worker.execute(() -> {
+            try {
+                Uri target = CaptureContentProvider.createExportUri(this, exportFilename(type));
+                try (OutputStream output = getContentResolver().openOutputStream(target, "w")) {
+                    if (output == null) throw new IOException("Output stream is unavailable.");
+                    writeExportPayload(document, output, type);
+                }
+                runOnUiThread(() -> {
+                    setBusy(false);
+                    launchPreparedExport(target, type, destination);
+                });
+            } catch (Throwable error) {
+                runOnUiThread(() -> {
+                    setBusy(false);
+                    showExportFailure(getString(R.string.save_failed, safeMessage(error)));
+                });
+            }
+        });
+    }
+
+    private void launchPreparedExport(
+            Uri target,
+            ExportType type,
+            ExportDestination destination
+    ) {
+        Intent intent;
+        if (destination == ExportDestination.OPEN_WITH) {
+            intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(target, exportMime(type));
+        } else {
+            intent = new Intent(Intent.ACTION_SEND);
+            intent.setType(exportMime(type));
+            intent.putExtra(Intent.EXTRA_STREAM, target);
+        }
+        intent.setClipData(ClipData.newRawUri("BIMO EasyDocs export", target));
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        try {
+            if (intent.resolveActivity(getPackageManager()) == null) {
+                Toast.makeText(this, R.string.export_no_app, Toast.LENGTH_LONG).show();
+                return;
+            }
+            startActivity(Intent.createChooser(intent, getString(R.string.export_destination_title)));
+        } catch (ActivityNotFoundException error) {
+            Toast.makeText(this, R.string.export_no_app, Toast.LENGTH_LONG).show();
+        }
+    }
+
     private void requestExport(ExportType type) {
         DocumentModel document = effectiveDocument();
         if (document.toPlainText().isEmpty()) return;
+        if (type == ExportType.XLSX && document.getWorksheet() == null) {
+            Toast.makeText(this, R.string.excel_table_only, Toast.LENGTH_SHORT).show();
+            return;
+        }
         pendingExport = type;
 
-        String timestamp = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ROOT).format(new Date());
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        if (type == ExportType.MARKDOWN) {
-            intent.setType("text/markdown");
-            intent.putExtra(Intent.EXTRA_TITLE, "OCR-" + timestamp + ".md");
-        } else if (type == ExportType.DOCX) {
-            intent.setType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-            intent.putExtra(Intent.EXTRA_TITLE, "OCR-" + timestamp + ".docx");
-        } else {
-            intent.setType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            intent.putExtra(Intent.EXTRA_TITLE, "OCR-" + timestamp + ".xlsx");
-        }
+        intent.setType(exportMime(type));
+        intent.putExtra(Intent.EXTRA_TITLE, exportFilename(type));
         startActivityForResult(intent, REQUEST_EXPORT);
     }
 
@@ -675,13 +769,7 @@ public final class MainActivity extends Activity {
         worker.execute(() -> {
             try (OutputStream output = getContentResolver().openOutputStream(target, "w")) {
                 if (output == null) throw new IOException("Output stream is unavailable.");
-                if (type == ExportType.MARKDOWN) {
-                    output.write(DocumentRenderer.toMarkdown(document).getBytes(StandardCharsets.UTF_8));
-                } else if (type == ExportType.DOCX) {
-                    DocxExporter.write(document, output);
-                } else {
-                    XlsxExporter.write(document, output);
-                }
+                writeExportPayload(document, output, type);
                 runOnUiThread(() -> {
                     setBusy(false);
                     Toast.makeText(this, R.string.save_success, Toast.LENGTH_SHORT).show();
@@ -689,16 +777,46 @@ public final class MainActivity extends Activity {
             } catch (Throwable error) {
                 runOnUiThread(() -> {
                     setBusy(false);
-                    showFailure(getString(R.string.save_failed, safeMessage(error)));
+                    showExportFailure(getString(R.string.save_failed, safeMessage(error)));
                 });
             }
         });
     }
 
+    private static void writeExportPayload(
+            DocumentModel document,
+            OutputStream output,
+            ExportType type
+    ) throws IOException {
+        if (type == ExportType.MARKDOWN) {
+            output.write(DocumentRenderer.toMarkdown(document).getBytes(StandardCharsets.UTF_8));
+        } else if (type == ExportType.DOCX) {
+            DocxExporter.write(document, output);
+        } else {
+            XlsxExporter.write(document, output);
+        }
+    }
+
+    private static String exportMime(ExportType type) {
+        if (type == ExportType.MARKDOWN) return "text/markdown";
+        if (type == ExportType.DOCX) {
+            return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        }
+        return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    }
+
+    private static String exportFilename(ExportType type) {
+        String timestamp = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ROOT).format(new Date());
+        if (type == ExportType.MARKDOWN) return "BIMO-EasyDocs-" + timestamp + ".md";
+        if (type == ExportType.DOCX) return "BIMO-EasyDocs-" + timestamp + ".docx";
+        return "BIMO-EasyDocs-" + timestamp + ".xlsx";
+    }
+
     private void setBusy(boolean busy) {
         progress.setVisibility(busy ? View.VISIBLE : View.GONE);
         galleryButton.setEnabled(!busy);
-        cameraButton.setEnabled(!busy);
+        fileButton.setEnabled(!busy);
+        primaryCaptureButton.setEnabled(!busy);
         settingsButton.setEnabled(!busy);
         tabInput.setEnabled(!busy);
         tabOutput.setEnabled(!busy);
@@ -709,9 +827,16 @@ public final class MainActivity extends Activity {
     private void enableResultActions(boolean enabled) {
         setActionEnabled(copyButton, enabled);
         setActionEnabled(shareButton, enabled);
-        setActionEnabled(markdownButton, enabled);
-        setActionEnabled(docxButton, enabled);
-        setActionEnabled(xlsxButton, enabled);
+        setActionEnabled(exportButton, enabled);
+        boolean worksheet = hasExportableWorksheet();
+        xlsxButton.setVisibility(worksheet ? View.VISIBLE : View.GONE);
+        setActionEnabled(xlsxButton, enabled && worksheet);
+    }
+
+    private boolean hasExportableWorksheet() {
+        if (currentDocument == null || currentDocument.getWorksheet() == null) return false;
+        return resultEditor.getText().toString().trim()
+                .equals(currentDocument.toPlainText().trim());
     }
 
     private static void setActionEnabled(View action, boolean enabled) {
@@ -722,6 +847,11 @@ public final class MainActivity extends Activity {
     private void showFailure(String message) {
         showTab(false);
         status.setText(message);
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
+    private void showExportFailure(String message) {
+        workspaceStatus.setText(message);
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 

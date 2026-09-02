@@ -83,18 +83,18 @@ jobs:
         shell: bash
         run: |
           mkdir -p artifacts/app artifacts/evidence/audit
-          cp app/build/outputs/apk/debug/app-debug.apk             artifacts/app/BIMO-Easy-to-Read-debug-arm64.apk
-          sha256sum artifacts/app/BIMO-Easy-to-Read-debug-arm64.apk             > artifacts/app/SHA256SUMS.txt
+          cp app/build/outputs/apk/debug/app-debug.apk             artifacts/app/BIMO-EasyDocs-debug-arm64.apk
+          sha256sum artifacts/app/BIMO-EasyDocs-debug-arm64.apk             > artifacts/app/SHA256SUMS.txt
           cp -r audit/. artifacts/evidence/audit/
           cp app/build/reports/lint-results-debug.html artifacts/evidence/
           cp -r app/build/reports/tests artifacts/evidence/app-tests
           cp -r core/build/reports/tests artifacts/evidence/core-tests
-          du -h artifacts/app/BIMO-Easy-to-Read-debug-arm64.apk             > artifacts/evidence/artifact-size.txt
+          du -h artifacts/app/BIMO-EasyDocs-debug-arm64.apk             > artifacts/evidence/artifact-size.txt
 
       - name: Upload installable debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: BIMO-Debug-APK-arm64-${{ github.event.pull_request.head.sha || github.sha }}
+          name: BIMO-EasyDocs-Debug-APK-arm64-${{ github.event.pull_request.head.sha || github.sha }}
           path: artifacts/app/
           if-no-files-found: error
           compression-level: 0

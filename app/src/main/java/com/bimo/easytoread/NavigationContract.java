@@ -8,7 +8,7 @@ public final class NavigationContract {
         DOCUMENTS,
         SCAN,
         TOOLS,
-        SETTINGS,
+        ACTIVITY,
         WORKSPACE
     }
 
@@ -27,14 +27,18 @@ public final class NavigationContract {
                 Screen.DOCUMENTS,
                 Screen.SCAN,
                 Screen.TOOLS,
-                Screen.SETTINGS
+                Screen.ACTIVITY
         ).contains(from) && EnumSet.of(
                 Screen.HOME,
                 Screen.DOCUMENTS,
                 Screen.SCAN,
                 Screen.TOOLS,
-                Screen.SETTINGS
+                Screen.ACTIVITY
         ).contains(to);
+    }
+
+    public static String[] globalNavigation() {
+        return new String[] { "Beranda", "Dokumen", "Pindai", "Alat", "Aktivitas" };
     }
 
     public static String[] scanModes() {
@@ -48,5 +52,11 @@ public final class NavigationContract {
 
     public static String[] workspaceTabs() {
         return new String[] { "Baca", "Edit", "Review" };
+    }
+
+    public static String[] workspaceActions(boolean tableDetected) {
+        return tableDetected
+                ? new String[] { "Salin", "Bagikan", "Export", "Excel" }
+                : new String[] { "Salin", "Bagikan", "Export" };
     }
 }

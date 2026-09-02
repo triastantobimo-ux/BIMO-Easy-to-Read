@@ -25,13 +25,12 @@ public final class HomeActivity extends Activity {
         findViewById(R.id.buttonScanDocument).setOnClickListener(view -> openScan());
         findViewById(R.id.buttonHomeSearch).setOnClickListener(view -> openHub(HubActivity.DESTINATION_DOCUMENTS));
         findViewById(R.id.buttonHomeProfile).setOnClickListener(view -> openSettings());
-        findViewById(R.id.buttonContinueReview).setOnClickListener(view -> openScan());
-
         findViewById(R.id.buttonNavHome).setOnClickListener(view -> { });
         findViewById(R.id.buttonNavDocuments).setOnClickListener(view -> openHub(HubActivity.DESTINATION_DOCUMENTS));
         findViewById(R.id.buttonNavScan).setOnClickListener(view -> openScan());
         findViewById(R.id.buttonNavTools).setOnClickListener(view -> openHub(HubActivity.DESTINATION_TOOLS));
-        findViewById(R.id.buttonNavSettings).setOnClickListener(view -> openSettings());
+        findViewById(R.id.buttonNavActivity).setOnClickListener(view ->
+                openHub(HubActivity.DESTINATION_ACTIVITY));
     }
 
     private void openScan() {
