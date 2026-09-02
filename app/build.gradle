@@ -17,8 +17,8 @@ android {
         applicationId 'com.bimo.easytoread'
         minSdk 31
         targetSdk 36
-        versionCode 4
-        versionName '0.4.0-easydocs'
+        versionCode 5
+        versionName '0.5.0-easydocs-v4'
         testInstrumentationRunner 'android.test.InstrumentationTestRunner'
         ndk {
             abiFilters targetAbi

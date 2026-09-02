@@ -1,5 +1,8 @@
 # BIMO EasyDocs - Locked UI/UX Contract V3
 
+> Obsolete after device evidence and product-owner redesign request dated 2 September 2026.
+> Use `../ui-v4/PRODUCT_ARCHITECTURE.md` and `../ui-v4/SCREEN_CONTRACTS.md`.
+
 Status: locked by product owner  
 Effective date: 2 September 2026  
 Supersedes: UI/UX Baseline V2 where navigation or Workspace actions conflict

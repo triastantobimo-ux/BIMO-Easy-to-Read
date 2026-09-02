@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/globalBottomNavigation"
     android:layout_width="match_parent"
     android:layout_height="82dp"
     android:background="@drawable/bg_bottom_navigation"
@@ -36,8 +37,8 @@
         android:text="@string/nav_tools" />
 
     <Button
-        android:id="@+id/buttonNavActivity"
+        android:id="@+id/buttonNavOcr"
         style="@style/Widget.EasyRead.Nav"
-        android:drawableTop="@drawable/ic_history"
-        android:text="@string/nav_activity" />
+        android:drawableTop="@drawable/ic_read"
+        android:text="@string/nav_ocr" />
 </LinearLayout>

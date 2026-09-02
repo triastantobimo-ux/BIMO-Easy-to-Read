@@ -277,7 +277,7 @@ public final class MlKitOcrEngine implements OcrEngine {
     }
 
     private static boolean isCommonPunctuation(char value) {
-        return ".,:;!?()[]{}'\"/\\-â€“â€”_+%#@&*=<>|â€¢Â·".indexOf(value) >= 0;
+        return ".,:;!?()[]{}'\"/\\-–—_+%#@&*=<>|•·".indexOf(value) >= 0;
     }
 
     @Override

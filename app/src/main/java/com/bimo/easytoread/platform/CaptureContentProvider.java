@@ -73,6 +73,7 @@ public final class CaptureContentProvider extends ContentProvider {
         if (path.endsWith(".xlsx")) {
             return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
         }
+        if (path.endsWith(".pdf")) return "application/pdf";
         return "image/jpeg";
     }
 

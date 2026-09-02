@@ -23,17 +23,19 @@ public final class HomeActivity extends Activity {
 
         findViewById(R.id.buttonOpenDocument).setOnClickListener(view -> openDocument());
         findViewById(R.id.buttonScanDocument).setOnClickListener(view -> openScan());
+        findViewById(R.id.buttonOcrScanner).setOnClickListener(view -> openOcr());
+        findViewById(R.id.buttonPdfTools).setOnClickListener(view ->
+                openHub(HubActivity.DESTINATION_TOOLS));
         findViewById(R.id.buttonHomeProfile).setOnClickListener(view -> openSettings());
-        findViewById(R.id.buttonNavHome).setOnClickListener(view -> { });
-        findViewById(R.id.buttonNavDocuments).setOnClickListener(view -> openHub(HubActivity.DESTINATION_DOCUMENTS));
-        findViewById(R.id.buttonNavScan).setOnClickListener(view -> openScan());
-        findViewById(R.id.buttonNavTools).setOnClickListener(view -> openHub(HubActivity.DESTINATION_TOOLS));
-        findViewById(R.id.buttonNavActivity).setOnClickListener(view ->
-                openHub(HubActivity.DESTINATION_ACTIVITY));
+        AppNavigation.bind(this, NavigationContract.Screen.HOME);
     }
 
     private void openScan() {
-        startActivity(new Intent(this, MainActivity.class));
+        startActivity(MainActivity.createEntryIntent(this, MainActivity.ENTRY_SCAN));
+    }
+
+    private void openOcr() {
+        startActivity(MainActivity.createEntryIntent(this, MainActivity.ENTRY_OCR));
     }
 
     private void openSettings() {
@@ -73,11 +75,17 @@ public final class HomeActivity extends Activity {
         }
 
         String type = getContentResolver().getType(uri);
-        Intent forward = new Intent(this, MainActivity.class);
-        forward.setAction(Intent.ACTION_SEND);
-        forward.setType(type == null ? "*/*" : type);
-        forward.putExtra(Intent.EXTRA_STREAM, uri);
-        forward.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivity(forward);
+        boolean pdf = "application/pdf".equals(type)
+                || uri.toString().toLowerCase(java.util.Locale.ROOT).endsWith(".pdf");
+        if (pdf) {
+            startActivity(PdfViewerActivity.createIntent(this, uri));
+        } else {
+            Intent forward = MainActivity.createEntryIntent(this, MainActivity.ENTRY_OCR);
+            forward.setAction(Intent.ACTION_SEND);
+            forward.setType(type == null ? "image/*" : type);
+            forward.putExtra(Intent.EXTRA_STREAM, uri);
+            forward.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(forward);
+        }
     }
 }

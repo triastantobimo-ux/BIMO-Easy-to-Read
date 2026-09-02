@@ -82,7 +82,8 @@
     <string name="nav_home">Beranda</string>
     <string name="nav_documents">Dokumen</string>
     <string name="nav_scan">Pindai</string>
-    <string name="nav_tools">Alat</string>
+    <string name="nav_tools">Alat PDF</string>
+    <string name="nav_ocr">OCR</string>
     <string name="nav_activity">Aktivitas</string>
     <string name="nav_settings">Pengaturan</string>
     <string name="choose_scan_type">Pilih jenis pemindaian</string>
@@ -135,4 +136,78 @@
     <string name="search_not_found">Teks tidak ditemukan.</string>
     <string name="cancel">Batal</string>
 
+    <string name="home_header_subtitle">Pusat dokumen pribadi Anda</string>
+    <string name="home_workflow_hint">Pilih tujuan. Setiap shortcut menuju modul yang sama dengan menu bawah.</string>
+    <string name="home_open_pdf">Buka PDF\nReader</string>
+    <string name="home_ocr_scanner">OCR\nScanner</string>
+    <string name="home_pdf_tools">Alat PDF</string>
+
+    <string name="documents_library">LIBRARY DOKUMEN</string>
+    <string name="documents_intro_v4">Buka PDF untuk dibaca, atau pilih gambar agar diteruskan ke OCR. Pemilih file Android juga menampilkan cloud drive yang terpasang di perangkat.</string>
+    <string name="documents_empty_title">Buka file dari device atau cloud</string>
+    <string name="documents_empty_description">Riwayat palsu tidak ditampilkan. File yang dipilih tetap berada di lokasi asal sampai Anda menyimpan hasil baru.</string>
+    <string name="documents_open_file">Buka PDF atau gambar</string>
+    <string name="saf_cloud_note">Akses OneDrive, Google Drive, dan provider lain dilakukan melalui pemilih file Android. Aplikasi tidak menerima password cloud Anda.</string>
+
+    <string name="tools_category_convert">CONVERT</string>
+    <string name="tools_intro_v4">Hanya alat yang sudah berfungsi ditampilkan sebagai aksi aktif.</string>
+    <string name="tool_image_to_pdf">Gambar ke PDF</string>
+    <string name="tool_image_to_pdf_description">Pilih satu atau beberapa gambar, pertahankan urutannya, lalu simpan sebagai satu PDF.</string>
+    <string name="tool_choose_images">Pilih gambar</string>
+    <string name="pdf_created">PDF berhasil dibuat.</string>
+    <string name="pdf_create_failed">PDF gagal dibuat: %1$s</string>
+
+    <string name="pdf_open_failed">PDF tidak dapat dibuka.</string>
+    <string name="pdf_open_failed_detail">PDF tidak dapat dibuka: %1$s</string>
+    <string name="pdf_page_count">Halaman %1$d dari %2$d</string>
+    <string name="pdf_document">Dokumen PDF</string>
+    <string name="pdf_reader">PDF Reader</string>
+    <string name="share_document">Bagikan dokumen</string>
+    <string name="pdf_page_preview">Pratinjau halaman PDF</string>
+    <string name="previous_page">Sebelum</string>
+    <string name="next_page">Berikut</string>
+    <string name="reset_zoom">Reset zoom</string>
+    <string name="ocr_this_page">OCR halaman ini</string>
+
+    <string name="scan_setup_subtitle">Pilih single atau batch sebelum membuka kamera</string>
+    <string name="scan_setup_status">Belum ada halaman. Pilih mode lalu buka kamera.</string>
+    <string name="scan_review_title">Review halaman</string>
+    <string name="scan_review_subtitle">Periksa urutan sebelum membuat PDF atau menjalankan OCR</string>
+    <string name="scan_choose_session">Pilih jenis pemindaian</string>
+    <string name="scan_mode_explanation">Mode menentukan jumlah halaman dalam satu sesi, bukan jenis OCR.</string>
+    <string name="scan_single">Dokumen tunggal\nSatu halaman</string>
+    <string name="scan_batch">Batch halaman\nSatu file PDF</string>
+    <string name="open_system_camera">Buka kamera perangkat</string>
+    <string name="system_camera_quality_note">Pengambilan gambar memakai aplikasi kamera bawaan perangkat agar fokus, resolusi, dan pemrosesan kamera tetap tersedia.</string>
+    <string name="scan_page_limit">Maksimum 50 halaman per sesi.</string>
+    <string name="scan_page_added">Halaman %1$d ditambahkan. Periksa sebelum melanjutkan.</string>
+    <string name="scan_page_count">Halaman %1$d dari %2$d</string>
+    <string name="move_left">Geser kiri</string>
+    <string name="move_right">Geser kanan</string>
+    <string name="rotate_page">Putar</string>
+    <string name="delete_page">Hapus</string>
+    <string name="add_page">Tambah halaman</string>
+    <string name="finish_scan">Selesai</string>
+    <string name="scan_finish_title">Output pemindaian</string>
+    <string name="scan_save_pdf">Simpan PDF</string>
+    <string name="scan_share_pdf">Bagikan PDF</string>
+    <string name="scan_open_pdf">Buka sebagai PDF</string>
+    <string name="scan_continue_ocr">Lanjutkan ke OCR</string>
+
+    <string name="ocr_source_subtitle">Foto, gambar, atau halaman PDF menjadi teks terstruktur</string>
+    <string name="ocr_source_status">Pilih satu sumber untuk mulai membaca.</string>
+    <string name="ocr_choose_source">Pilih sumber OCR</string>
+    <string name="ocr_detection_note">Orientasi, urutan baca, paragraf, dan tabel dideteksi otomatis.</string>
+    <string name="ocr_camera">Ambil foto dengan kamera</string>
+    <string name="ocr_gallery">Galeri\nGambar</string>
+    <string name="ocr_pdf_file">PDF / File\nDevice atau cloud</string>
+    <string name="ocr_structure_note">Jika grid cell terdeteksi, hasil dibuka sebagai tabel editable dan tombol Excel muncul. Jika tidak, hasil dibuka sebagai teks editable.</string>
+    <string name="ocr_batch_progress">OCR halaman %1$d dari %2$d…</string>
+    <string name="ocr_editable_workspace">Langsung pilih, koreksi, cari, salin, atau export</string>
+    <string name="workspace_table_status">Tabel terstruktur siap dikoreksi atau diexport.</string>
+    <string name="workspace_table_review_status">Cell berborder oranye memerlukan pemeriksaan.</string>
+    <string name="show_plain_text">Tampilkan sebagai teks</string>
+    <string name="show_table">Tampilkan sebagai tabel</string>
+    <string name="export_no_app_title">Aplikasi tujuan tidak tersedia</string>
+    <string name="export_no_app_fallback">File tetap dapat disimpan melalui Save As.</string>
 </resources>

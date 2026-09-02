@@ -1,7 +1,6 @@
 package com.bimo.easytoread;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -13,27 +12,22 @@ public final class NavigationContractTest {
                 "Beranda",
                 "Dokumen",
                 "Pindai",
-                "Alat",
-                "Aktivitas"
+                "Alat PDF",
+                "OCR"
         }, NavigationContract.globalNavigation());
     }
 
     @Test
     public void preservesLockedScanModeOrder() {
         assertArrayEquals(new String[] {
-                "Dokumen",
-                "Tabel / Excel",
-                "Teks cepat",
-                "Beberapa halaman"
+                "Dokumen tunggal",
+                "Batch halaman"
         }, NavigationContract.scanModes());
     }
 
     @Test
-    public void preservesLockedWorkspaceTabOrder() {
-        assertArrayEquals(
-                new String[] { "Baca", "Edit", "Review" },
-                NavigationContract.workspaceTabs()
-        );
+    public void ocrWorkspaceHasNoModeTabs() {
+        assertArrayEquals(new String[0], NavigationContract.workspaceTabs());
     }
 
     @Test
@@ -52,15 +46,19 @@ public final class NavigationContractTest {
     public void workspaceIsContextualNotGlobal() {
         assertTrue(NavigationContract.isAllowed(
                 NavigationContract.Screen.SCAN,
-                NavigationContract.Screen.WORKSPACE
+                NavigationContract.Screen.SCAN_REVIEW
         ));
         assertTrue(NavigationContract.isAllowed(
-                NavigationContract.Screen.WORKSPACE,
-                NavigationContract.Screen.SCAN
+                NavigationContract.Screen.SCAN_REVIEW,
+                NavigationContract.Screen.OCR_WORKSPACE
         ));
-        assertFalse(NavigationContract.isAllowed(
-                NavigationContract.Screen.WORKSPACE,
-                NavigationContract.Screen.TOOLS
+        assertTrue(NavigationContract.isAllowed(
+                NavigationContract.Screen.DOCUMENTS,
+                NavigationContract.Screen.PDF_WORKSPACE
+        ));
+        assertTrue(NavigationContract.isAllowed(
+                NavigationContract.Screen.OCR_WORKSPACE,
+                NavigationContract.Screen.SCAN
         ));
     }
 }

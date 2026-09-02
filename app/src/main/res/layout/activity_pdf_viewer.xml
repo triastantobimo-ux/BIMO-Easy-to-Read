@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/surface_base"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:background="@color/surface_top"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <ImageButton
+            android:id="@+id/buttonPdfBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/back"
+            android:padding="13dp"
+            android:src="@drawable/ic_back" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/pdfTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="middle"
+                android:maxLines="1"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/pdf_reader"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/buttonPdfShare"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:background="@drawable/bg_icon_button"
+            android:contentDescription="@string/share_document"
+            android:padding="11dp"
+            android:src="@drawable/ic_share" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/pdfProgress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:indeterminate="true"
+        android:indeterminateTint="@color/accent_secondary"
+        android:visibility="gone" />
+
+    <com.bimo.easytoread.ZoomImageView
+        android:id="@+id/pdfPageImage"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="12dp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_document_page"
+        android:contentDescription="@string/pdf_page_preview"
+        android:padding="8dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="62dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/bg_utility_bar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="6dp">
+
+        <Button
+            android:id="@+id/buttonPdfPrevious"
+            style="@style/Widget.EasyRead.Button.Secondary"
+            android:layout_width="72dp"
+            android:layout_height="48dp"
+            android:text="@string/previous_page" />
+
+        <TextView
+            android:id="@+id/textPdfPage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/buttonPdfNext"
+            style="@style/Widget.EasyRead.Button.Secondary"
+            android:layout_width="72dp"
+            android:layout_height="48dp"
+            android:text="@string/next_page" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/bg_action_shelf"
+        android:orientation="horizontal"
+        android:padding="4dp">
+
+        <Button
+            android:id="@+id/buttonPdfResetZoom"
+            style="@style/Widget.EasyRead.WorkspaceAction"
+            android:text="@string/reset_zoom" />
+
+        <Button
+            android:id="@+id/buttonPdfOcr"
+            style="@style/Widget.EasyRead.WorkspaceAction.Primary"
+            android:drawableTop="@drawable/ic_read"
+            android:text="@string/ocr_this_page" />
+    </LinearLayout>
+</LinearLayout>
