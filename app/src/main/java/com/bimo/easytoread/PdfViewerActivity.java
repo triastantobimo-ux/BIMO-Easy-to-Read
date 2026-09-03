@@ -1,5 +1,6 @@
 package com.bimo.easytoread;
 
+import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
@@ -25,10 +26,12 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.OptIn;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.pdf.ExperimentalPdfApi;
 import androidx.pdf.PdfDocument;
 import androidx.pdf.PdfWriteHandle;
 import androidx.pdf.view.PdfView;
@@ -45,6 +48,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /** Focused PDF workspace. PDF reading and editing do not require OCR initialization. */
+@OptIn(markerClass = ExperimentalPdfApi.class)
+@SuppressLint("NewApi") // Every extension API path is protected by supportsPdfEditing().
 public final class PdfViewerActivity extends AppCompatActivity implements PdfWorkspaceHost {
     public static final String EXTRA_SOURCE_URI = "source_uri";
     private static final String FRAGMENT_TAG = "bimo_pdf_workspace";

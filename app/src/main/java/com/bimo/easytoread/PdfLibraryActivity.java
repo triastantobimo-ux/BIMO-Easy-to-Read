@@ -70,11 +70,12 @@ public final class PdfLibraryActivity extends Activity {
                 || data == null || data.getData() == null) return;
 
         Uri uri = data.getData();
-        int offered = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION
-                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        int offered = data.getFlags();
         boolean writable = (offered & Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0;
+        int persistableFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION;
+        if (writable) persistableFlags |= Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
         try {
-            getContentResolver().takePersistableUriPermission(uri, offered);
+            getContentResolver().takePersistableUriPermission(uri, persistableFlags);
         } catch (SecurityException ignored) {
             // Immediate grant remains valid for this Activity stack.
         }

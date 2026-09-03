@@ -211,7 +211,7 @@
     <string name="pdf_ocr_page">OCR halaman ini</string>
     <string name="pdf_loading">Membuka PDF…</string>
     <string name="pdf_ready_meta">%1$d halaman · continuous reader</string>
-    <string name="pdf_read_capability">Pilih teks dengan tekan lama. Cari, zoom 50–2500%, bookmark, share, dan print tersedia langsung.</string>
+    <string name="pdf_read_capability">Pilih teks dengan tekan lama. Cari, zoom 50–2500%%, bookmark, share, dan print tersedia langsung.</string>
     <string name="pdf_edit_capability">Anotasi, highlighter, form filling, serta tanda tangan visual tersedia dan disimpan non-destructive.</string>
     <string name="pdf_visual_signature_note">Tanda tangan pada mode anotasi adalah tanda tangan visual, bukan digital signature berbasis sertifikat.</string>
     <string name="pdf_more_options">Opsi PDF lainnya</string>

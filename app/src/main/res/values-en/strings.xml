@@ -211,7 +211,7 @@
     <string name="pdf_ocr_page">OCR this page</string>
     <string name="pdf_loading">Opening PDF…</string>
     <string name="pdf_ready_meta">%1$d pages · continuous reader</string>
-    <string name="pdf_read_capability">Long-press to select text. Search, 50–2500% zoom, bookmarks, share, and print are available in the reader.</string>
+    <string name="pdf_read_capability">Long-press to select text. Search, 50–2500%% zoom, bookmarks, share, and print are available in the reader.</string>
     <string name="pdf_edit_capability">Annotations, highlighting, form filling, and visual signatures are saved non-destructively.</string>
     <string name="pdf_visual_signature_note">A signature drawn in annotation mode is visual only, not a certificate-based digital signature.</string>
     <string name="pdf_more_options">More PDF options</string>
