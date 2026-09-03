@@ -37,6 +37,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".PdfLibraryActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".HomeActivity"
             android:exported="true">
             <intent-filter>
@@ -64,3 +68,4 @@
     </application>
 
 </manifest>
+

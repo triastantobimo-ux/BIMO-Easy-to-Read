@@ -60,6 +60,14 @@ jobs:
           mkdir -p audit
           ./gradlew --no-daemon -PtargetAbi=arm64-v8a :app:dependencies             --configuration debugRuntimeClasspath > audit/debug-dependencies.txt
 
+      - name: Verify Phase 1 PDF dependencies and contracts
+        shell: bash
+        run: |
+          grep -q 'androidx.pdf:pdf-viewer-fragment:1.0.0-beta01' audit/debug-dependencies.txt
+          grep -q 'androidx.pdf:pdf-ink:1.0.0-beta01' audit/debug-dependencies.txt
+          grep -q 'PDF Reader & Editor' docs/pdf-phase1/FEATURE_SPEC.md
+          grep -q 'Certificate-based digital signature' app/src/main/java/com/bimo/easytoread/PdfFeatureContract.java
+
       - name: Verify bundled OCR model packaging
         shell: bash
         run: |
@@ -107,3 +115,4 @@ jobs:
           path: artifacts/evidence/
           if-no-files-found: error
           retention-days: 30
+

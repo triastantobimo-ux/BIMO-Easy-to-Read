@@ -11,13 +11,13 @@ final class AppNavigation {
 
     static void bind(Activity activity, NavigationContract.Screen active) {
         Button home = activity.findViewById(R.id.buttonNavHome);
-        Button documents = activity.findViewById(R.id.buttonNavDocuments);
+        Button pdf = activity.findViewById(R.id.buttonNavPdf);
         Button scan = activity.findViewById(R.id.buttonNavScan);
         Button tools = activity.findViewById(R.id.buttonNavTools);
         Button ocr = activity.findViewById(R.id.buttonNavOcr);
 
         setSelected(activity, home, active == NavigationContract.Screen.HOME, false);
-        setSelected(activity, documents, active == NavigationContract.Screen.DOCUMENTS, false);
+        setSelected(activity, pdf, active == NavigationContract.Screen.PDF, false);
         setSelected(activity, scan, active == NavigationContract.Screen.SCAN, true);
         setSelected(activity, tools, active == NavigationContract.Screen.TOOLS, false);
         setSelected(activity, ocr, active == NavigationContract.Screen.OCR, false);
@@ -28,10 +28,9 @@ final class AppNavigation {
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
             activity.finish();
         });
-        documents.setOnClickListener(view -> {
-            if (active == NavigationContract.Screen.DOCUMENTS) return;
-            activity.startActivity(new Intent(activity, HubActivity.class)
-                    .putExtra(HubActivity.EXTRA_DESTINATION, HubActivity.DESTINATION_DOCUMENTS));
+        pdf.setOnClickListener(view -> {
+            if (active == NavigationContract.Screen.PDF) return;
+            activity.startActivity(new Intent(activity, PdfLibraryActivity.class));
         });
         scan.setOnClickListener(view -> {
             if (active == NavigationContract.Screen.SCAN) return;
@@ -71,3 +70,4 @@ final class AppNavigation {
         button.setAlpha(1f);
     }
 }
+

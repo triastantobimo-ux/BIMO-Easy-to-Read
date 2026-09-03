@@ -17,8 +17,8 @@ android {
         applicationId 'com.bimo.easytoread'
         minSdk 31
         targetSdk 36
-        versionCode 5
-        versionName '0.5.0-easydocs-v4'
+        versionCode 6
+        versionName '0.6.0-pdf-phase1'
         testInstrumentationRunner 'android.test.InstrumentationTestRunner'
         ndk {
             abiFilters targetAbi
@@ -79,5 +79,11 @@ dependencies {
     // Bundled Latin OCR model: no runtime model download and no cloud OCR call.
     implementation 'com.google.mlkit:text-recognition:16.0.1'
 
+    // Phase 1 PDF workspace: continuous reading, selection/search, forms, and annotations.
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'androidx.pdf:pdf-viewer-fragment:1.0.0-beta01'
+    implementation 'androidx.pdf:pdf-ink:1.0.0-beta01'
+
     testImplementation 'junit:junit:4.13.2'
 }
+

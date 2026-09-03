@@ -77,7 +77,7 @@ public final class HubActivity extends Activity {
             cardDescription.setText(R.string.documents_empty_description);
             primary.setText(R.string.documents_open_file);
             cardIcon.setImageResource(R.drawable.ic_folder);
-            AppNavigation.bind(this, NavigationContract.Screen.DOCUMENTS);
+            AppNavigation.bind(this, NavigationContract.Screen.PDF);
         }
     }
 
@@ -217,3 +217,4 @@ public final class HubActivity extends Activity {
         super.onDestroy();
     }
 }
+

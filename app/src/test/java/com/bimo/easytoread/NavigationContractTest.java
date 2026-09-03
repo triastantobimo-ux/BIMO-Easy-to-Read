@@ -10,9 +10,9 @@ public final class NavigationContractTest {
     public void preservesFiveItemGlobalNavigationWithScanCentered() {
         assertArrayEquals(new String[] {
                 "Beranda",
-                "Dokumen",
+                "PDF",
                 "Pindai",
-                "Alat PDF",
+                "Alat",
                 "OCR"
         }, NavigationContract.globalNavigation());
     }
@@ -53,7 +53,7 @@ public final class NavigationContractTest {
                 NavigationContract.Screen.OCR_WORKSPACE
         ));
         assertTrue(NavigationContract.isAllowed(
-                NavigationContract.Screen.DOCUMENTS,
+                NavigationContract.Screen.PDF,
                 NavigationContract.Screen.PDF_WORKSPACE
         ));
         assertTrue(NavigationContract.isAllowed(
@@ -62,3 +62,4 @@ public final class NavigationContractTest {
         ));
     }
 }
+

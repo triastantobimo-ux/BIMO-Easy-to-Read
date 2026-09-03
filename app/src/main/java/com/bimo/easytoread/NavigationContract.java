@@ -5,7 +5,7 @@ import java.util.EnumSet;
 public final class NavigationContract {
     public enum Screen {
         HOME,
-        DOCUMENTS,
+        PDF,
         SCAN,
         TOOLS,
         OCR,
@@ -21,7 +21,7 @@ public final class NavigationContract {
         if (from == null || to == null) return false;
         EnumSet<Screen> global = EnumSet.of(
                 Screen.HOME,
-                Screen.DOCUMENTS,
+                Screen.PDF,
                 Screen.SCAN,
                 Screen.TOOLS,
                 Screen.OCR
@@ -30,27 +30,27 @@ public final class NavigationContract {
         if (from == Screen.SCAN && to == Screen.SCAN_REVIEW) return true;
         if (from == Screen.SCAN_REVIEW) {
             return to == Screen.SCAN || to == Screen.OCR_WORKSPACE
-                    || to == Screen.PDF_WORKSPACE || to == Screen.DOCUMENTS;
+                    || to == Screen.PDF_WORKSPACE || to == Screen.PDF;
         }
-        if ((from == Screen.SCAN || from == Screen.OCR || from == Screen.DOCUMENTS
+        if ((from == Screen.SCAN || from == Screen.OCR || from == Screen.PDF
                 || from == Screen.PDF_WORKSPACE) && to == Screen.OCR_WORKSPACE) return true;
-        if (from == Screen.DOCUMENTS && to == Screen.PDF_WORKSPACE) return true;
-        if ((from == Screen.DOCUMENTS || from == Screen.PDF_WORKSPACE)
+        if (from == Screen.PDF && to == Screen.PDF_WORKSPACE) return true;
+        if ((from == Screen.PDF || from == Screen.PDF_WORKSPACE)
                 && to == Screen.TOOL_JOB) return true;
         if (from == Screen.TOOL_JOB) {
-            return to == Screen.PDF_WORKSPACE || to == Screen.DOCUMENTS || to == Screen.TOOLS;
+            return to == Screen.PDF_WORKSPACE || to == Screen.PDF || to == Screen.TOOLS;
         }
         if (from == Screen.PDF_WORKSPACE) {
-            return to == Screen.DOCUMENTS || to == Screen.OCR || to == Screen.TOOLS;
+            return to == Screen.PDF || to == Screen.OCR || to == Screen.TOOLS;
         }
         if (from == Screen.OCR_WORKSPACE) {
-            return to == Screen.OCR || to == Screen.SCAN || to == Screen.DOCUMENTS;
+            return to == Screen.OCR || to == Screen.SCAN || to == Screen.PDF;
         }
         return false;
     }
 
     public static String[] globalNavigation() {
-        return new String[] { "Beranda", "Dokumen", "Pindai", "Alat PDF", "OCR" };
+        return new String[] { "Beranda", "PDF", "Pindai", "Alat", "OCR" };
     }
 
     public static String[] scanModes() {
@@ -70,3 +70,4 @@ public final class NavigationContract {
                 : new String[] { "Salin", "Bagikan", "Export" };
     }
 }
+
