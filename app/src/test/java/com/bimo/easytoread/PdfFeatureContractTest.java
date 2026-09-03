@@ -8,18 +8,17 @@ import org.junit.Test;
 
 public final class PdfFeatureContractTest {
     @Test
-    public void readerAndEditorRemainStandaloneFromOcrAndPdfTools() {
-        assertEquals(6, PdfFeatureContract.readerFeatures().length);
-        assertEquals(6, PdfFeatureContract.editorFeatures().length);
-        assertEquals(4, PdfFeatureContract.explicitNonClaims().length);
+    public void pdfProcessorIsBundledAndIndependentFromSdkExtensions() {
+        assertEquals("Bundled PDFium 2.0.3", PdfFeatureContract.ENGINE);
+        assertFalse(PdfFeatureContract.REQUIRES_SDK_EXTENSION);
+        assertFalse(PdfFeatureContract.REQUIRES_RUNTIME_DOWNLOAD);
     }
 
     @Test
-    public void editorRequiresAndroidSExtension18() {
-        assertFalse(PdfFeatureContract.supportsEditor(30, 18));
-        assertFalse(PdfFeatureContract.supportsEditor(31, 17));
-        assertTrue(PdfFeatureContract.supportsEditor(31, 18));
-        assertTrue(PdfFeatureContract.supportsEditor(36, 20));
+    public void readerAndEditorContractsRemainExplicit() {
+        assertEquals(7, PdfFeatureContract.deliveredReaderFeatures().length);
+        assertEquals(6, PdfFeatureContract.editorAcceptanceCriteria().length);
+        assertEquals(3, PdfFeatureContract.explicitNonClaims().length);
+        assertTrue(PdfFeatureContract.editorAcceptanceCriteria()[5].contains("No AndroidX PDF"));
     }
 }
-

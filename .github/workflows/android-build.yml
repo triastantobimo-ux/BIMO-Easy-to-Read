@@ -39,7 +39,7 @@ jobs:
         shell: bash
         run: |
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"             "platforms;android-36"             "platforms;android-36-ext19"             "build-tools;36.0.0"             "platform-tools"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"             "platforms;android-36"             "build-tools;36.0.0"             "platform-tools"
 
       - name: Generate pinned Gradle Wrapper
         run: gradle wrapper --gradle-version 9.4.1
@@ -67,13 +67,16 @@ jobs:
           mkdir -p audit
           ./gradlew --no-daemon -PtargetAbi=arm64-v8a :app:dependencies             --configuration debugRuntimeClasspath > audit/debug-dependencies.txt
 
-      - name: Verify Phase 1 PDF dependencies and contracts
+      - name: Verify bundled BIMO PDF Core dependencies and contracts
         shell: bash
         run: |
-          grep -q 'androidx.pdf:pdf-viewer-fragment:1.0.0-beta01' audit/debug-dependencies.txt
-          grep -q 'androidx.pdf:pdf-ink:1.0.0-beta01' audit/debug-dependencies.txt
-          grep -q 'PDF Reader & Editor' docs/pdf-phase1/FEATURE_SPEC.md
-          grep -q 'Certificate-based digital signature' app/src/main/java/com/bimo/easytoread/PdfFeatureContract.java
+          grep -q 'io.legere:pdfiumandroid:2.0.3' audit/debug-dependencies.txt
+          if grep -q 'androidx.pdf:' audit/debug-dependencies.txt; then
+            echo "AndroidX PDF must not be a runtime dependency of BIMO PDF Core."
+            exit 1
+          fi
+          grep -q 'Bundled PDFium 2.0.3' app/src/main/java/com/bimo/easytoread/PdfFeatureContract.java
+          grep -q 'Apache License 2.0' docs/pdf-phase1/THIRD_PARTY_NOTICES.md
 
       - name: Verify bundled OCR model packaging
         shell: bash
@@ -82,6 +85,7 @@ jobs:
           grep -q 'assets/models/det/inference.onnx' audit/apk-contents.txt
           grep -q 'assets/models/rec/inference.onnx' audit/apk-contents.txt
           grep -q 'assets/models/rec/inference.yml' audit/apk-contents.txt
+          grep -Eq 'lib/arm64-v8a/.*pdfium.*\.so' audit/apk-contents.txt
 
       - name: Audit debug APK permissions
         shell: bash
@@ -122,4 +126,3 @@ jobs:
           path: artifacts/evidence/
           if-no-files-found: error
           retention-days: 30
-

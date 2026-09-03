@@ -14,12 +14,10 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Typeface;
-import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.InputType;
@@ -708,20 +706,9 @@ public final class MainActivity extends Activity {
     }
 
     private Bitmap renderPdfPage(Uri uri, int requestedPage, int maxSide) throws IOException {
-        try (ParcelFileDescriptor descriptor = getContentResolver().openFileDescriptor(uri, "r")) {
-            if (descriptor == null) throw new IOException("PDF descriptor is unavailable.");
-            try (PdfRenderer renderer = new PdfRenderer(descriptor)) {
-                int target = Math.max(0, Math.min(renderer.getPageCount() - 1, requestedPage));
-                try (PdfRenderer.Page page = renderer.openPage(target)) {
-                    float scale = Math.min(3f, maxSide / (float) Math.max(page.getWidth(), page.getHeight()));
-                    int width = Math.max(1, Math.round(page.getWidth() * scale));
-                    int height = Math.max(1, Math.round(page.getHeight() * scale));
-                    Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                    bitmap.eraseColor(Color.WHITE);
-                    page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-                    return bitmap;
-                }
-            }
+        try (BimoPdfEngine pdf = BimoPdfEngine.open(this, uri, null)) {
+            int target = Math.max(0, Math.min(pdf.getPageCount() - 1, requestedPage));
+            return pdf.renderPage(target, maxSide);
         }
     }
 

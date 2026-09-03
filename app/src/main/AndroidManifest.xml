@@ -33,15 +33,7 @@
             android:exported="false" />
 
         <activity
-            android:name=".PdfViewerActivity"
-            android:exported="false" />
-
-        <activity
             android:name=".PdfCompatActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".PdfObjectEditorActivity"
             android:exported="false" />
 
         <activity

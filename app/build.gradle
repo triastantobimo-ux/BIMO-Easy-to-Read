@@ -12,14 +12,13 @@ if (!allowedTargetAbis.contains(targetAbi)) {
 android {
     namespace 'com.bimo.easytoread'
     compileSdk 36
-    compileSdkExtension 19
 
     defaultConfig {
         applicationId 'com.bimo.easytoread'
         minSdk 31
         targetSdk 36
-        versionCode 7
-        versionName '0.6.1-pdf-hotfix'
+        versionCode 8
+        versionName '0.7.0-bimo-pdf-core'
         testInstrumentationRunner 'android.test.InstrumentationTestRunner'
         ndk {
             abiFilters targetAbi
@@ -86,10 +85,10 @@ dependencies {
     // Bundled Latin OCR model: no runtime model download and no cloud OCR call.
     implementation 'com.google.mlkit:text-recognition:16.0.1'
 
-    // Phase 1 PDF workspace: continuous reading, selection/search, forms, and annotations.
+    // Phase 1 PDF workspace. PDFium is packaged in the APK; no SDK Extension
+    // or separately installed PDF component is required at runtime.
     implementation 'androidx.appcompat:appcompat:1.7.1'
-    implementation 'androidx.pdf:pdf-viewer-fragment:1.0.0-beta01'
-    implementation 'androidx.pdf:pdf-ink:1.0.0-beta01'
+    implementation 'io.legere:pdfiumandroid:2.0.3'
 
     testImplementation 'junit:junit:4.13.2'
 }

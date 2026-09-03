@@ -1,31 +1,33 @@
 package com.bimo.easytoread;
 
-/** Auditable Phase 1 boundary for the standalone PDF Reader & Editor module. */
+/** Auditable Phase 1 boundary for the standalone BIMO PDF processor. */
 public final class PdfFeatureContract {
-    public static final int EDITOR_EXTENSION_BASE = 31;
-    public static final int EDITOR_EXTENSION_VERSION = 18;
+    public static final String ENGINE = "Bundled PDFium 2.0.3";
+    public static final boolean REQUIRES_SDK_EXTENSION = false;
+    public static final boolean REQUIRES_RUNTIME_DOWNLOAD = false;
 
     private PdfFeatureContract() {}
 
-    public static String[] readerFeatures() {
+    public static String[] deliveredReaderFeatures() {
         return new String[] {
                 "Open PDF from device or Android document provider",
-                "Continuous page rendering",
-                "Native text search and text selection",
-                "Page jump, bookmark, resume, and one/two-page layout",
-                "Zoom 50%-2500%",
-                "Share, print, and OCR current page"
+                "Bundled native PDF rendering",
+                "Password-protected PDF open",
+                "Text-layer extraction and document search",
+                "Page jump, bookmark, and resume",
+                "Pinch zoom and pan",
+                "Share, print, save copy, and OCR current page"
         };
     }
 
-    public static String[] editorFeatures() {
+    public static String[] editorAcceptanceCriteria() {
         return new String[] {
-                "Ink annotation and highlighting",
-                "Erase, undo, and redo",
-                "PDF form filling",
-                "Visual signature as ink annotation",
-                "Supported page text/image object edit on S Extension 19+",
-                "Save original when writable or save a copy"
+                "Annotation and highlighting saved inside the PDF",
+                "Form field editing",
+                "Visual signature annotation",
+                "Text and image object editing without flattening untouched pages",
+                "Undo, redo, dirty-state protection, and save copy",
+                "No AndroidX PDF or SDK Extension dependency"
         };
     }
 
@@ -33,14 +35,7 @@ public final class PdfFeatureContract {
         return new String[] {
                 "Certificate-based digital signature",
                 "Exact embedded-font glyph guarantee for arbitrary replacement text",
-                "Page merge, split, reorder, or compression",
                 "Password removal or security bypass"
         };
     }
-
-    public static boolean supportsEditor(int sdkInt, int extensionVersion) {
-        return sdkInt >= EDITOR_EXTENSION_BASE
-                && extensionVersion >= EDITOR_EXTENSION_VERSION;
-    }
 }
-
