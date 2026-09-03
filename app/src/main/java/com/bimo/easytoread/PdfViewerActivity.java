@@ -25,6 +25,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -128,6 +129,18 @@ public final class PdfViewerActivity extends AppCompatActivity implements PdfWor
         findViewById(R.id.buttonPdfShare).setOnClickListener(view -> sharePdf());
         annotateButton.setOnClickListener(view -> toggleAnnotation());
         saveButton.setOnClickListener(view -> requestSaveCopy());
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (pdfFragment instanceof PdfViewerFragment
+                        && ((PdfViewerFragment) pdfFragment).isTextSearchActive()) {
+                    ((PdfViewerFragment) pdfFragment).setTextSearchActive(false);
+                    return;
+                }
+                handleClose();
+            }
+        });
 
         installFragment(state);
         updateBookmarkUi();
@@ -539,16 +552,6 @@ public final class PdfViewerActivity extends AppCompatActivity implements PdfWor
                 .setNeutralButton(R.string.pdf_discard, (dialog, which) -> finish())
                 .setPositiveButton(R.string.pdf_save_copy, (dialog, which) -> requestSaveCopy())
                 .show();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (pdfFragment instanceof PdfViewerFragment
-                && ((PdfViewerFragment) pdfFragment).isTextSearchActive()) {
-            ((PdfViewerFragment) pdfFragment).setTextSearchActive(false);
-            return;
-        }
-        handleClose();
     }
 
     private void setBusy(boolean busy) {

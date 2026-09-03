@@ -51,9 +51,16 @@ jobs:
           scripts/prepare-ocr-models.sh
 
       - name: Build arm64 debug APK and run tests
+        shell: bash
         run: |
           chmod +x gradlew
+          set +e
           ./gradlew --no-daemon -PtargetAbi=arm64-v8a clean             :core:test             :app:testDebugUnitTest             :app:lintDebug             :app:assembleDebug
+          BUILD_STATUS=$?
+          if [ -f app/build/reports/lint-results-debug.txt ]; then
+            cat app/build/reports/lint-results-debug.txt
+          fi
+          exit "$BUILD_STATUS"
 
       - name: Export dependency evidence
         run: |

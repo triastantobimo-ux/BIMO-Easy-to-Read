@@ -70,6 +70,12 @@ android {
             ]
         }
     }
+
+    lint {
+        htmlReport true
+        textReport true
+        textOutput file("$buildDir/reports/lint-results-debug.txt")
+    }
 }
 
 dependencies {
