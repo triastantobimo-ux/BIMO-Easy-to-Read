@@ -161,6 +161,7 @@
     <string name="pdf_open_failed">PDF tidak dapat dibuka.</string>
     <string name="pdf_open_failed_detail">PDF tidak dapat dibuka: %1$s</string>
     <string name="pdf_page_count">Halaman %1$d dari %2$d</string>
+    <string name="pdf_page">Halaman</string>
     <string name="pdf_document">Dokumen PDF</string>
     <string name="pdf_reader">PDF Reader</string>
     <string name="pdf_reader_editor">PDF Reader &amp; Editor</string>
