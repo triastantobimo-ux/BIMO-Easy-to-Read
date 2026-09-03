@@ -225,7 +225,7 @@ public final class PdfViewerActivity extends AppCompatActivity implements PdfWor
                                     | ParcelFileDescriptor.MODE_TRUNCATE
                                     | ParcelFileDescriptor.MODE_READ_WRITE
                     )) {
-                        handle.writeTo(target);
+                        PdfWriteBridge.writeBlocking(handle, target);
                     }
                     try (InputStream input = new FileInputStream(temporary);
                          OutputStream output = requireOutput(sourceUri)) {
@@ -235,7 +235,7 @@ public final class PdfViewerActivity extends AppCompatActivity implements PdfWor
                     try (ParcelFileDescriptor target = getContentResolver()
                             .openFileDescriptor(destination, "w")) {
                         if (target == null) throw new IOException("Destination is unavailable.");
-                        handle.writeTo(target);
+                        PdfWriteBridge.writeBlocking(handle, target);
                     }
                 }
                 closeQuietly(handle);
