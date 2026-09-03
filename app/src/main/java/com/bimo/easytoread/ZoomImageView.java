@@ -8,31 +8,72 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import android.view.ViewConfiguration;
 import android.widget.ImageView;
 
+/** Image surface with bounded pinch/pan and page-swipe navigation at fit scale. */
 @SuppressLint("AppCompatCustomView")
 public final class ZoomImageView extends ImageView {
+    public interface OnPageSwipeListener {
+        void onNextPage();
+        void onPreviousPage();
+    }
+
+    private static final float MIN_ZOOM = 1f;
+    private static final float MAX_ZOOM = 5f;
+
     private final Matrix imageMatrix = new Matrix();
+    private final float[] matrixValues = new float[9];
     private final ScaleGestureDetector scaleDetector;
+    private final int touchSlop;
+    private final float swipeThreshold;
     private float fitScale = 1f;
     private float zoom = 1f;
     private float lastX;
     private float lastY;
+    private float downX;
+    private float downY;
+    private boolean scaleChanged;
+    private OnPageSwipeListener pageSwipeListener;
 
     public ZoomImageView(Context context, AttributeSet attributes) {
         super(context, attributes);
         setScaleType(ScaleType.MATRIX);
-        scaleDetector = new ScaleGestureDetector(context, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
-            @Override
-            public boolean onScale(ScaleGestureDetector detector) {
-                float next = Math.max(1f, Math.min(5f, zoom * detector.getScaleFactor()));
-                float factor = next / zoom;
-                zoom = next;
-                imageMatrix.postScale(factor, factor, detector.getFocusX(), detector.getFocusY());
-                setImageMatrix(imageMatrix);
-                return true;
-            }
-        });
+        touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        swipeThreshold = 64f * getResources().getDisplayMetrics().density;
+        scaleDetector = new ScaleGestureDetector(context,
+                new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                    @Override
+                    public boolean onScaleBegin(ScaleGestureDetector detector) {
+                        scaleChanged = true;
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onScale(ScaleGestureDetector detector) {
+                        float next = clamp(zoom * detector.getScaleFactor(), MIN_ZOOM, MAX_ZOOM);
+                        float factor = next / zoom;
+                        zoom = next;
+                        imageMatrix.postScale(factor, factor,
+                                detector.getFocusX(), detector.getFocusY());
+                        clampTranslation();
+                        applyMatrix();
+                        return true;
+                    }
+
+                    @Override
+                    public void onScaleEnd(ScaleGestureDetector detector) {
+                        if (zoom <= 1.01f) resetToFit();
+                        else {
+                            clampTranslation();
+                            applyMatrix();
+                        }
+                    }
+                });
+    }
+
+    public void setOnPageSwipeListener(OnPageSwipeListener listener) {
+        pageSwipeListener = listener;
     }
 
     @Override
@@ -50,21 +91,45 @@ public final class ZoomImageView extends ImageView {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         scaleDetector.onTouchEvent(event);
-        if (event.getPointerCount() == 1 && !scaleDetector.isInProgress()) {
-            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                lastX = event.getX();
-                lastY = event.getY();
-            } else if (event.getActionMasked() == MotionEvent.ACTION_MOVE && zoom > 1f) {
-                float dx = event.getX() - lastX;
-                float dy = event.getY() - lastY;
-                imageMatrix.postTranslate(dx, dy);
-                setImageMatrix(imageMatrix);
-                lastX = event.getX();
-                lastY = event.getY();
-            }
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                downX = lastX = event.getX();
+                downY = lastY = event.getY();
+                scaleChanged = false;
+                return true;
+            case MotionEvent.ACTION_MOVE:
+                if (event.getPointerCount() == 1 && !scaleDetector.isInProgress()
+                        && zoom > 1.01f) {
+                    float dx = event.getX() - lastX;
+                    float dy = event.getY() - lastY;
+                    imageMatrix.postTranslate(dx, dy);
+                    clampTranslation();
+                    applyMatrix();
+                    lastX = event.getX();
+                    lastY = event.getY();
+                }
+                return true;
+            case MotionEvent.ACTION_UP:
+                float dx = event.getX() - downX;
+                float dy = event.getY() - downY;
+                if (!scaleChanged && zoom <= 1.01f && pageSwipeListener != null
+                        && Math.max(Math.abs(dx), Math.abs(dy)) >= swipeThreshold) {
+                    if (Math.abs(dx) >= Math.abs(dy)) {
+                        if (dx < 0f) pageSwipeListener.onNextPage();
+                        else pageSwipeListener.onPreviousPage();
+                    } else {
+                        if (dy < 0f) pageSwipeListener.onNextPage();
+                        else pageSwipeListener.onPreviousPage();
+                    }
+                } else if (Math.abs(dx) < touchSlop && Math.abs(dy) < touchSlop) {
+                    performClick();
+                }
+                return true;
+            case MotionEvent.ACTION_CANCEL:
+                return true;
+            default:
+                return true;
         }
-        if (event.getActionMasked() == MotionEvent.ACTION_UP) performClick();
-        return true;
     }
 
     @Override
@@ -75,12 +140,14 @@ public final class ZoomImageView extends ImageView {
 
     public void resetToFit() {
         Drawable drawable = getDrawable();
-        if (drawable == null || getWidth() == 0 || getHeight() == 0) return;
-        float widthScale = getWidth() / (float) Math.max(1, drawable.getIntrinsicWidth());
-        float heightScale = getHeight() / (float) Math.max(1, drawable.getIntrinsicHeight());
+        if (drawable == null || getWidth() <= 0 || getHeight() <= 0) return;
+        int sourceWidth = Math.max(1, drawable.getIntrinsicWidth());
+        int sourceHeight = Math.max(1, drawable.getIntrinsicHeight());
+        float widthScale = getWidth() / (float) sourceWidth;
+        float heightScale = getHeight() / (float) sourceHeight;
         fitScale = Math.min(widthScale, heightScale);
-        float displayedWidth = drawable.getIntrinsicWidth() * fitScale;
-        float displayedHeight = drawable.getIntrinsicHeight() * fitScale;
+        float displayedWidth = sourceWidth * fitScale;
+        float displayedHeight = sourceHeight * fitScale;
         imageMatrix.reset();
         imageMatrix.postScale(fitScale, fitScale);
         imageMatrix.postTranslate(
@@ -88,7 +155,45 @@ public final class ZoomImageView extends ImageView {
                 (getHeight() - displayedHeight) / 2f
         );
         zoom = 1f;
+        applyMatrix();
+    }
+
+    public float getRelativeZoom() {
+        return zoom;
+    }
+
+    private void clampTranslation() {
+        Drawable drawable = getDrawable();
+        if (drawable == null || getWidth() <= 0 || getHeight() <= 0) return;
+        imageMatrix.getValues(matrixValues);
+        float matrixScale = matrixValues[Matrix.MSCALE_X];
+        float renderedWidth = drawable.getIntrinsicWidth() * matrixScale;
+        float renderedHeight = drawable.getIntrinsicHeight() * matrixScale;
+        float currentX = matrixValues[Matrix.MTRANS_X];
+        float currentY = matrixValues[Matrix.MTRANS_Y];
+
+        float targetX;
+        if (renderedWidth <= getWidth()) {
+            targetX = (getWidth() - renderedWidth) / 2f;
+        } else {
+            targetX = clamp(currentX, getWidth() - renderedWidth, 0f);
+        }
+
+        float targetY;
+        if (renderedHeight <= getHeight()) {
+            targetY = (getHeight() - renderedHeight) / 2f;
+        } else {
+            targetY = clamp(currentY, getHeight() - renderedHeight, 0f);
+        }
+        imageMatrix.postTranslate(targetX - currentX, targetY - currentY);
+    }
+
+    private void applyMatrix() {
         setImageMatrix(imageMatrix);
+        invalidate();
+    }
+
+    private static float clamp(float value, float minimum, float maximum) {
+        return Math.max(minimum, Math.min(maximum, value));
     }
 }
-

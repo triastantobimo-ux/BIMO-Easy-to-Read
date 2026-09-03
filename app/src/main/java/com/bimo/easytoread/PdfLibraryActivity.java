@@ -7,12 +7,13 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.text.TextUtils;
 import java.util.List;
 
 /** Dedicated PDF entry point. Images and OCR are intentionally routed elsewhere. */
@@ -91,24 +92,54 @@ public final class PdfLibraryActivity extends Activity {
         emptyState.setVisibility(empty ? View.VISIBLE : View.GONE);
         clearRecent.setVisibility(empty ? View.GONE : View.VISIBLE);
         for (PdfSessionStore.RecentPdf item : items) {
-            Button row = new Button(this);
-            row.setAllCaps(false);
-            row.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
-            row.setText(item.displayName + "\n" + getString(
-                    R.string.pdf_recent_page,
-                    item.lastPage + 1
-            ));
-            row.setTextColor(getColor(R.color.text_primary));
-            row.setTextSize(15f);
-            row.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_pdf, 0, 0, 0);
-            row.setCompoundDrawablePadding(dp(14));
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setGravity(android.view.Gravity.CENTER_VERTICAL);
             row.setBackgroundResource(R.drawable.bg_card);
-            row.setPadding(dp(18), dp(10), dp(16), dp(10));
+            row.setPadding(dp(14), dp(8), dp(12), dp(8));
+            row.setClickable(true);
+            row.setFocusable(true);
+
+            ImageView icon = new ImageView(this);
+            icon.setImageResource(R.drawable.ic_pdf);
+            icon.setContentDescription(null);
+            LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(dp(30), dp(30));
+            iconParams.setMarginEnd(dp(12));
+            row.addView(icon, iconParams);
+
+            LinearLayout labels = new LinearLayout(this);
+            labels.setOrientation(LinearLayout.VERTICAL);
+            TextView name = new TextView(this);
+            name.setText(item.displayName);
+            name.setTextColor(getColor(R.color.text_primary));
+            name.setTextSize(14f);
+            name.setTypeface(name.getTypeface(), android.graphics.Typeface.BOLD);
+            name.setSingleLine(true);
+            name.setEllipsize(TextUtils.TruncateAt.MIDDLE);
+            labels.addView(name, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+
+            TextView page = new TextView(this);
+            page.setText(getString(R.string.pdf_recent_page, item.lastPage + 1));
+            page.setTextColor(getColor(R.color.text_secondary));
+            page.setTextSize(11f);
+            page.setSingleLine(true);
+            LinearLayout.LayoutParams pageParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT);
+            pageParams.topMargin = dp(2);
+            labels.addView(page, pageParams);
+            row.addView(labels, new LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f));
+
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
-                    dp(72)
+                    dp(58)
             );
-            params.topMargin = dp(10);
+            params.topMargin = dp(8);
             row.setLayoutParams(params);
             row.setOnClickListener(view -> startActivity(
                     PdfViewerActivity.createIntent(this, item.uri)
@@ -140,4 +171,3 @@ public final class PdfLibraryActivity extends Activity {
         return Math.round(value * getResources().getDisplayMetrics().density);
     }
 }
-

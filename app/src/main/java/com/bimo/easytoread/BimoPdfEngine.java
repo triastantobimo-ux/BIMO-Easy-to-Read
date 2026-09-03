@@ -2,13 +2,20 @@ package com.bimo.easytoread;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import io.legere.pdfiumandroid.PdfDocument;
+import io.legere.pdfiumandroid.PdfPage;
+import io.legere.pdfiumandroid.PdfTextPage;
 import io.legere.pdfiumandroid.PdfiumCore;
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Bundled PDFium-backed processing boundary for BIMO EasyDocs.
@@ -95,6 +102,95 @@ public final class BimoPdfEngine implements Closeable {
         } catch (Throwable error) {
             throw new IOException("PDFium failed to read page text.", error);
         }
+    }
+
+    public synchronized int countTextMatches(int pageIndex, String query) throws IOException {
+        if (query == null || query.isEmpty()) return 0;
+        return findOccurrenceStarts(extractText(pageIndex), query).size();
+    }
+
+    /** Draws every match in yellow and the active match with an orange outline. */
+    public synchronized void drawSearchHighlights(
+            Bitmap bitmap,
+            int pageIndex,
+            String query,
+            int activeMatchOnPage
+    ) throws IOException {
+        ensurePage(pageIndex);
+        if (bitmap == null || bitmap.isRecycled() || query == null || query.isEmpty()) return;
+        try (PdfPage page = document.openPage(pageIndex)) {
+            if (page == null) throw new IOException("PDFium could not open the search page.");
+            int pageWidth = page.getPageWidthPoint();
+            int pageHeight = page.getPageHeightPoint();
+            if (pageWidth <= 0 || pageHeight <= 0) return;
+            try (PdfTextPage textPage = page.openTextPage()) {
+                int characterCount = textPage.textPageCountChars();
+                if (characterCount <= 0) return;
+                String text = textPage.textPageGetText(0, characterCount);
+                List<Integer> starts = findOccurrenceStarts(text, query);
+                if (starts.isEmpty()) return;
+
+                Canvas canvas = new Canvas(bitmap);
+                Paint fill = new Paint(Paint.ANTI_ALIAS_FLAG);
+                fill.setStyle(Paint.Style.FILL);
+                fill.setColor(Color.argb(105, 255, 214, 10));
+                Paint active = new Paint(Paint.ANTI_ALIAS_FLAG);
+                active.setStyle(Paint.Style.STROKE);
+                active.setStrokeWidth(Math.max(3f, bitmap.getWidth() / 450f));
+                active.setColor(Color.rgb(255, 128, 0));
+                float scaleX = bitmap.getWidth() / (float) pageWidth;
+                float scaleY = bitmap.getHeight() / (float) pageHeight;
+
+                for (int matchIndex = 0; matchIndex < starts.size(); matchIndex++) {
+                    int rectCount = textPage.textPageCountRects(
+                            starts.get(matchIndex), query.length());
+                    for (int rectIndex = 0; rectIndex < rectCount; rectIndex++) {
+                        RectF pdfRect = textPage.textPageGetRect(rectIndex);
+                        if (pdfRect == null) continue;
+                        RectF bitmapRect = mapPdfRect(pdfRect, pageHeight, scaleX, scaleY);
+                        canvas.drawRoundRect(bitmapRect, 3f, 3f, fill);
+                        if (matchIndex == activeMatchOnPage) {
+                            canvas.drawRoundRect(bitmapRect, 3f, 3f, active);
+                        }
+                    }
+                }
+            }
+        } catch (Throwable error) {
+            if (error instanceof IOException) throw (IOException) error;
+            throw new IOException("PDFium failed to locate search highlights.", error);
+        }
+    }
+
+    private static List<Integer> findOccurrenceStarts(String text, String query) {
+        ArrayList<Integer> starts = new ArrayList<>();
+        if (text == null || query == null || query.isEmpty() || text.length() < query.length()) {
+            return starts;
+        }
+        int limit = text.length() - query.length();
+        for (int index = 0; index <= limit; ) {
+            if (text.regionMatches(true, index, query, 0, query.length())) {
+                starts.add(index);
+                index += Math.max(1, query.length());
+            } else {
+                index++;
+            }
+        }
+        return starts;
+    }
+
+    private static RectF mapPdfRect(
+            RectF source,
+            int pageHeight,
+            float scaleX,
+            float scaleY
+    ) {
+        float left = Math.min(source.left, source.right) * scaleX;
+        float right = Math.max(source.left, source.right) * scaleX;
+        float pdfBottom = Math.min(source.top, source.bottom);
+        float pdfTop = Math.max(source.top, source.bottom);
+        float top = (pageHeight - pdfTop) * scaleY;
+        float bottom = (pageHeight - pdfBottom) * scaleY;
+        return new RectF(left, top, right, bottom);
     }
 
     private void ensurePage(int pageIndex) {

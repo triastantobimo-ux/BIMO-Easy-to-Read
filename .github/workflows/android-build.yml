@@ -77,6 +77,14 @@ jobs:
           fi
           grep -q 'Bundled PDFium 1.0.33' app/src/main/java/com/bimo/easytoread/PdfFeatureContract.java
           grep -q 'Apache License 2.0' docs/pdf-phase1/THIRD_PARTY_NOTICES.md
+          grep -q 'pdfSearchBar' app/src/main/res/layout/activity_pdf_compat.xml
+          grep -q 'pdfSearchCounter' app/src/main/res/layout/activity_pdf_compat.xml
+          grep -q 'drawSearchHighlights' app/src/main/java/com/bimo/easytoread/BimoPdfEngine.java
+          grep -q 'clampTranslation' app/src/main/java/com/bimo/easytoread/ZoomImageView.java
+          if grep -q 'pdf_read_capability' app/src/main/res/layout/activity_pdf_library.xml; then
+            echo "Technical capability hint must not crowd the PDF Center."
+            exit 1
+          fi
 
       - name: Verify bundled OCR model packaging
         shell: bash

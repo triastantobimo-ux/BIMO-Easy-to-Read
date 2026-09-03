@@ -12,8 +12,14 @@ import android.os.Bundle;
 import android.print.PrintManager;
 import android.provider.OpenableColumns;
 import android.text.InputType;
+import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
@@ -33,22 +39,29 @@ public final class PdfCompatActivity extends AppCompatActivity {
     private static final int REQUEST_SAVE_COPY = 2501;
 
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
-    private final List<Integer> searchMatches = new ArrayList<>();
+    private final List<SearchHit> searchMatches = new ArrayList<>();
     private Uri sourceUri;
     private String displayName;
     private BimoPdfEngine engine;
     private ZoomImageView pageImage;
     private TextView title;
     private TextView status;
+    private LinearLayout searchBar;
+    private EditText searchInput;
+    private TextView searchCounter;
+    private ImageButton searchPreviousButton;
+    private ImageButton searchNextButton;
     private Button pageButton;
-    private Button previousButton;
-    private Button nextButton;
-    private Button bookmarkButton;
+    private ImageButton previousButton;
+    private ImageButton nextButton;
+    private ImageButton bookmarkButton;
     private Bitmap displayedBitmap;
     private int currentPage;
     private int pageCount;
     private int renderGeneration;
+    private int searchGeneration;
     private int searchCursor = -1;
+    private String activeSearchQuery = "";
     private boolean destroyed;
     private boolean opening;
 
@@ -73,6 +86,11 @@ public final class PdfCompatActivity extends AppCompatActivity {
         pageImage = findViewById(R.id.pdfCompatImage);
         title = findViewById(R.id.pdfCompatTitle);
         status = findViewById(R.id.pdfCompatStatus);
+        searchBar = findViewById(R.id.pdfSearchBar);
+        searchInput = findViewById(R.id.pdfSearchInput);
+        searchCounter = findViewById(R.id.pdfSearchCounter);
+        searchPreviousButton = findViewById(R.id.buttonPdfSearchPrevious);
+        searchNextButton = findViewById(R.id.buttonPdfSearchNext);
         pageButton = findViewById(R.id.buttonPdfCompatPage);
         previousButton = findViewById(R.id.buttonPdfPrevious);
         nextButton = findViewById(R.id.buttonPdfNext);
@@ -94,13 +112,40 @@ public final class PdfCompatActivity extends AppCompatActivity {
         pageButton.setOnClickListener(view -> showPageJump());
         bookmarkButton.setOnClickListener(view -> toggleBookmark());
         findViewById(R.id.buttonPdfCompatFit).setOnClickListener(view -> pageImage.resetToFit());
-        findViewById(R.id.buttonPdfSearch).setOnClickListener(view -> showSearchDialog());
+        findViewById(R.id.buttonPdfSearch).setOnClickListener(view -> {
+            if (searchBar.getVisibility() == View.VISIBLE) {
+                searchDocument(searchInput.getText().toString().trim());
+            } else {
+                openSearchBar();
+            }
+        });
+        findViewById(R.id.buttonPdfSearchClose).setOnClickListener(view -> closeSearchBar());
+        searchPreviousButton.setOnClickListener(view -> moveSearchResult(-1));
+        searchNextButton.setOnClickListener(view -> moveSearchResult(1));
+        searchInput.setOnEditorActionListener((view, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                searchDocument(searchInput.getText().toString().trim());
+                return true;
+            }
+            return false;
+        });
+        pageImage.setOnPageSwipeListener(new ZoomImageView.OnPageSwipeListener() {
+            @Override
+            public void onNextPage() {
+                showPage(currentPage + 1);
+            }
+
+            @Override
+            public void onPreviousPage() {
+                showPage(currentPage - 1);
+            }
+        });
         findViewById(R.id.buttonPdfText).setOnClickListener(view -> showTextLayer());
         findViewById(R.id.buttonPdfCompatShare).setOnClickListener(view -> sharePdf());
         findViewById(R.id.buttonPdfCompatOcr).setOnClickListener(view -> openCurrentPageAsOcr());
-        findViewById(R.id.buttonPdfPrint).setOnClickListener(view -> printPdf());
         findViewById(R.id.buttonPdfCompatSave).setOnClickListener(view -> requestSaveCopy());
-        status.setText(R.string.pdf_engine_opening);
+        findViewById(R.id.buttonPdfMore).setOnClickListener(this::showMoreMenu);
+        status.setText(R.string.pdf_loading);
         openEngine(null, true);
     }
 
@@ -169,6 +214,11 @@ public final class PdfCompatActivity extends AppCompatActivity {
             try {
                 int viewportWidth = Math.max(1080, getResources().getDisplayMetrics().widthPixels * 2);
                 Bitmap rendered = engine.renderPage(pageIndex, Math.min(3200, viewportWidth));
+                int activeOnPage = activeMatchOnPage(pageIndex);
+                if (!activeSearchQuery.isEmpty()) {
+                    engine.drawSearchHighlights(rendered, pageIndex,
+                            activeSearchQuery, activeOnPage);
+                }
                 runOnUiThread(() -> {
                     if (destroyed || generation != renderGeneration) {
                         rendered.recycle();
@@ -191,7 +241,10 @@ public final class PdfCompatActivity extends AppCompatActivity {
         previousButton.setEnabled(currentPage > 0);
         nextButton.setEnabled(currentPage + 1 < pageCount);
         boolean bookmarked = PdfSessionStore.isBookmarked(this, sourceUri, currentPage);
-        bookmarkButton.setText(bookmarked ? R.string.pdf_bookmarked : R.string.pdf_bookmark);
+        bookmarkButton.setSelected(bookmarked);
+        bookmarkButton.setAlpha(bookmarked ? 1f : 0.72f);
+        bookmarkButton.setContentDescription(getString(
+                bookmarked ? R.string.pdf_bookmarked : R.string.pdf_bookmark));
     }
 
     private void toggleBookmark() {
@@ -226,47 +279,117 @@ public final class PdfCompatActivity extends AppCompatActivity {
                 }).show();
     }
 
-    private void showSearchDialog() {
+    private void openSearchBar() {
         if (engine == null) return;
-        EditText input = new EditText(this);
-        input.setSingleLine(true);
-        input.setHint(R.string.pdf_search_hint);
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.pdf_search)
-                .setView(input)
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.pdf_search, (dialog, which) ->
-                        searchDocument(input.getText().toString().trim()))
-                .show();
+        searchBar.setVisibility(View.VISIBLE);
+        searchInput.requestFocus();
+        InputMethodManager keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        keyboard.showSoftInput(searchInput, InputMethodManager.SHOW_IMPLICIT);
+    }
+
+    private void closeSearchBar() {
+        searchGeneration++;
+        activeSearchQuery = "";
+        searchMatches.clear();
+        searchCursor = -1;
+        searchCounter.setText(R.string.pdf_search_counter_empty);
+        searchPreviousButton.setEnabled(false);
+        searchNextButton.setEnabled(false);
+        searchBar.setVisibility(View.GONE);
+        InputMethodManager keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        keyboard.hideSoftInputFromWindow(searchInput.getWindowToken(), 0);
+        if (engine != null) renderPage(currentPage);
     }
 
     private void searchDocument(String query) {
         if (query.isEmpty()) return;
+        final int generation = ++searchGeneration;
+        activeSearchQuery = query;
         setBusy(true);
         worker.execute(() -> {
-            ArrayList<Integer> found = new ArrayList<>();
+            ArrayList<SearchHit> found = new ArrayList<>();
             try {
-                String needle = query.toLowerCase(Locale.ROOT);
                 for (int page = 0; page < pageCount; page++) {
                     if (Thread.currentThread().isInterrupted()) return;
-                    if (engine.extractText(page).toLowerCase(Locale.ROOT).contains(needle)) found.add(page);
+                    int count = engine.countTextMatches(page, query);
+                    for (int localIndex = 0; localIndex < count; localIndex++) {
+                        found.add(new SearchHit(page, localIndex));
+                    }
                 }
                 runOnUiThread(() -> {
+                    if (destroyed || generation != searchGeneration) return;
                     searchMatches.clear();
                     searchMatches.addAll(found);
                     searchCursor = found.isEmpty() ? -1 : 0;
                     setBusy(false);
+                    updateSearchCounter();
                     if (found.isEmpty()) {
-                        Toast.makeText(this, R.string.pdf_search_not_found, Toast.LENGTH_LONG).show();
+                        activeSearchQuery = query;
+                        Toast.makeText(this, R.string.pdf_search_scanned_hint, Toast.LENGTH_LONG).show();
+                        renderPage(currentPage);
                     } else {
-                        status.setText(getString(R.string.pdf_search_found, found.size()));
-                        showPage(found.get(0));
+                        Toast.makeText(this, getString(R.string.pdf_search_found, found.size()),
+                                Toast.LENGTH_SHORT).show();
+                        showSearchResult();
                     }
                 });
             } catch (Throwable error) {
-                runOnUiThread(() -> showNonFatal(error));
+                runOnUiThread(() -> {
+                    if (!destroyed && generation == searchGeneration) showNonFatal(error);
+                });
             }
         });
+    }
+
+    private void moveSearchResult(int direction) {
+        if (searchMatches.isEmpty()) return;
+        searchCursor = (searchCursor + direction + searchMatches.size()) % searchMatches.size();
+        updateSearchCounter();
+        showSearchResult();
+    }
+
+    private void showSearchResult() {
+        if (searchCursor < 0 || searchCursor >= searchMatches.size()) return;
+        SearchHit hit = searchMatches.get(searchCursor);
+        currentPage = hit.pageIndex;
+        PdfSessionStore.updatePage(this, sourceUri, currentPage);
+        updatePageUi();
+        renderPage(currentPage);
+    }
+
+    private int activeMatchOnPage(int pageIndex) {
+        if (searchCursor < 0 || searchCursor >= searchMatches.size()) return -1;
+        SearchHit hit = searchMatches.get(searchCursor);
+        return hit.pageIndex == pageIndex ? hit.localIndex : -1;
+    }
+
+    private void updateSearchCounter() {
+        boolean hasResults = !searchMatches.isEmpty();
+        searchCounter.setText(hasResults
+                ? getString(R.string.pdf_search_counter, searchCursor + 1, searchMatches.size())
+                : getString(R.string.pdf_search_counter_empty));
+        searchPreviousButton.setEnabled(hasResults);
+        searchNextButton.setEnabled(hasResults);
+    }
+
+    private void showMoreMenu(View anchor) {
+        PopupMenu menu = new PopupMenu(this, anchor);
+        menu.getMenu().add(0, 1, 0, R.string.pdf_more_print)
+                .setIcon(R.drawable.ic_export);
+        menu.getMenu().add(0, 2, 1, R.string.pdf_more_save_copy)
+                .setIcon(R.drawable.ic_export);
+        menu.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == 1) {
+                printPdf();
+                return true;
+            }
+            if (item.getItemId() == 2) {
+                requestSaveCopy();
+                return true;
+            }
+            return false;
+        });
+        menu.show();
     }
 
     private void showTextLayer() {
@@ -363,8 +486,10 @@ public final class PdfCompatActivity extends AppCompatActivity {
     private void setBusy(boolean busy) {
         pageButton.setEnabled(!busy && pageCount > 0);
         bookmarkButton.setEnabled(!busy && pageCount > 0);
+        previousButton.setEnabled(!busy && currentPage > 0);
+        nextButton.setEnabled(!busy && currentPage + 1 < pageCount);
+        status.setVisibility(busy ? View.VISIBLE : View.GONE);
         if (busy) status.setText(R.string.pdf_loading);
-        else status.setText(R.string.pdf_engine_ready);
     }
 
     private void showFatal(Throwable error) {
@@ -417,6 +542,16 @@ public final class PdfCompatActivity extends AppCompatActivity {
     private static Uri readUriExtra(Intent intent, String key) {
         if (Build.VERSION.SDK_INT >= 33) return intent.getParcelableExtra(key, Uri.class);
         return intent.getParcelableExtra(key);
+    }
+
+    private static final class SearchHit {
+        final int pageIndex;
+        final int localIndex;
+
+        SearchHit(int pageIndex, int localIndex) {
+            this.pageIndex = pageIndex;
+            this.localIndex = localIndex;
+        }
     }
 
     private void closeEngine() {

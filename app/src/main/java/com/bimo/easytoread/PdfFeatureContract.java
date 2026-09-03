@@ -13,9 +13,9 @@ public final class PdfFeatureContract {
                 "Open PDF from device or Android document provider",
                 "Bundled native PDF rendering",
                 "Password-protected PDF open",
-                "Text-layer extraction and document search",
+                "Text-layer extraction, all-match highlighting, and previous-next search",
                 "Page jump, bookmark, and resume",
-                "Pinch zoom and pan",
+                "Bounded pinch zoom, stable pan, and four-direction page swipe",
                 "Share, print, save copy, and OCR current page"
         };
     }

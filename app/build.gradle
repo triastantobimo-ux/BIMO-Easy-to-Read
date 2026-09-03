@@ -17,8 +17,8 @@ android {
         applicationId 'com.bimo.easytoread'
         minSdk 31
         targetSdk 36
-        versionCode 8
-        versionName '0.7.0-bimo-pdf-core'
+        versionCode 9
+        versionName '0.7.1-pdf-reader-ux'
         testInstrumentationRunner 'android.test.InstrumentationTestRunner'
         ndk {
             abiFilters targetAbi
