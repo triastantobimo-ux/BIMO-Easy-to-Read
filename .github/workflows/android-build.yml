@@ -1,0 +1,136 @@
+name: Android Cloud Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build installable debug APK, test, and audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle 9.4.1
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.4.1'
+
+      - name: Install Android SDK packages
+        shell: bash
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"             "platforms;android-36"             "build-tools;36.0.0"             "platform-tools"
+
+      - name: Generate pinned Gradle Wrapper
+        run: gradle wrapper --gradle-version 9.4.1
+
+      - name: Prepare pinned bundled PP-OCRv6 Medium models
+        shell: bash
+        run: |
+          chmod +x scripts/prepare-ocr-models.sh
+          scripts/prepare-ocr-models.sh
+
+      - name: Build arm64 debug APK and run tests
+        shell: bash
+        run: |
+          chmod +x gradlew
+          set +e
+          ./gradlew --no-daemon -PtargetAbi=arm64-v8a clean             :core:test             :app:testDebugUnitTest             :app:lintDebug             :app:assembleDebug
+          BUILD_STATUS=$?
+          if [ -f app/build/reports/lint-results-debug.txt ]; then
+            cat app/build/reports/lint-results-debug.txt
+          fi
+          exit "$BUILD_STATUS"
+
+      - name: Export dependency evidence
+        run: |
+          mkdir -p audit
+          ./gradlew --no-daemon -PtargetAbi=arm64-v8a :app:dependencies             --configuration debugRuntimeClasspath > audit/debug-dependencies.txt
+
+      - name: Verify bundled BIMO PDF Core dependencies and contracts
+        shell: bash
+        run: |
+          grep -q 'io.legere:pdfiumandroid:1.0.33' audit/debug-dependencies.txt
+          if grep -q 'androidx.pdf:' audit/debug-dependencies.txt; then
+            echo "AndroidX PDF must not be a runtime dependency of BIMO PDF Core."
+            exit 1
+          fi
+          grep -q 'Bundled PDFium 1.0.33' app/src/main/java/com/bimo/easytoread/PdfFeatureContract.java
+          grep -q 'Apache License 2.0' docs/pdf-phase1/THIRD_PARTY_NOTICES.md
+          grep -q 'pdfSearchBar' app/src/main/res/layout/activity_pdf_compat.xml
+          grep -q 'pdfSearchCounter' app/src/main/res/layout/activity_pdf_compat.xml
+          grep -q 'drawSearchHighlights' app/src/main/java/com/bimo/easytoread/BimoPdfEngine.java
+          grep -q 'clampTranslation' app/src/main/java/com/bimo/easytoread/ZoomImageView.java
+          if grep -q 'pdf_read_capability' app/src/main/res/layout/activity_pdf_library.xml; then
+            echo "Technical capability hint must not crowd the PDF Center."
+            exit 1
+          fi
+
+      - name: Verify bundled OCR model packaging
+        shell: bash
+        run: |
+          unzip -l app/build/outputs/apk/debug/app-debug.apk | tee audit/apk-contents.txt
+          grep -q 'assets/models/det/inference.onnx' audit/apk-contents.txt
+          grep -q 'assets/models/rec/inference.onnx' audit/apk-contents.txt
+          grep -q 'assets/models/rec/inference.yml' audit/apk-contents.txt
+          grep -Eq 'lib/arm64-v8a/.*pdfium.*\.so' audit/apk-contents.txt
+
+      - name: Audit debug APK permissions
+        shell: bash
+        run: |
+          AAPT2="$ANDROID_HOME/build-tools/36.0.0/aapt2"
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+          "$AAPT2" dump permissions "$APK" | tee audit/apk-permissions.txt
+          if grep -Eq '(android.permission.(INTERNET|ACCESS_NETWORK_STATE)|com.google.android.gms.permission.AD_ID)' audit/apk-permissions.txt; then
+            echo "Forbidden network, analytics, or advertising permission detected."
+            exit 1
+          fi
+
+      - name: Package debug APK and CI evidence
+        shell: bash
+        run: |
+          mkdir -p artifacts/app artifacts/evidence/audit
+          cp app/build/outputs/apk/debug/app-debug.apk             artifacts/app/BIMO-EasyDocs-debug-arm64.apk
+          sha256sum artifacts/app/BIMO-EasyDocs-debug-arm64.apk             > artifacts/app/SHA256SUMS.txt
+          cp -r audit/. artifacts/evidence/audit/
+          cp app/build/reports/lint-results-debug.html artifacts/evidence/
+          cp -r app/build/reports/tests artifacts/evidence/app-tests
+          cp -r core/build/reports/tests artifacts/evidence/core-tests
+          du -h artifacts/app/BIMO-EasyDocs-debug-arm64.apk             > artifacts/evidence/artifact-size.txt
+
+      - name: Upload installable debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BIMO-EasyDocs-Debug-APK-arm64-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/app/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
+
+      - name: Upload CI evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: BIMO-CI-Evidence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/evidence/
+          if-no-files-found: error
+          retention-days: 30

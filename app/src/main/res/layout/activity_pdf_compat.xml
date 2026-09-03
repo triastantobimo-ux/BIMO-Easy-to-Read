@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/surface_base"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/surface_top"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="6dp"
+        android:paddingEnd="8dp">
+
+        <ImageButton
+            android:id="@+id/buttonPdfCompatBack"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/back"
+            android:padding="12dp"
+            android:src="@drawable/ic_back" />
+
+        <TextView
+            android:id="@+id/pdfCompatTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_weight="1"
+            android:ellipsize="middle"
+            android:maxLines="1"
+            android:textColor="@color/text_primary"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/buttonPdfSearch"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/bg_icon_button"
+            android:contentDescription="@string/pdf_search"
+            android:padding="11dp"
+            android:src="@drawable/ic_search" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/pdfSearchBar"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:background="@drawable/bg_utility_bar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="6dp"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/pdfSearchInput"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_button_secondary"
+            android:hint="@string/pdf_search_hint"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:maxLines="1"
+            android:paddingStart="12dp"
+            android:paddingEnd="8dp"
+            android:singleLine="true"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_secondary"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/pdfSearchCounter"
+            android:layout_width="54dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:maxLines="1"
+            android:text="@string/pdf_search_counter_empty"
+            android:textColor="@color/text_primary"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/buttonPdfSearchPrevious"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/pdf_previous_result"
+            android:padding="11dp"
+            android:rotation="90"
+            android:src="@drawable/ic_back" />
+
+        <ImageButton
+            android:id="@+id/buttonPdfSearchNext"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/pdf_next_result"
+            android:padding="11dp"
+            android:rotation="270"
+            android:src="@drawable/ic_back" />
+
+        <ImageButton
+            android:id="@+id/buttonPdfSearchClose"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/close"
+            android:padding="11dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_utility_bar"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <ImageButton
+            android:id="@+id/buttonPdfPrevious"
+            style="@style/Widget.EasyRead.PdfToolbarIcon"
+            android:contentDescription="@string/pdf_previous"
+            android:src="@drawable/ic_back" />
+
+        <Button
+            android:id="@+id/buttonPdfCompatPage"
+            style="@style/Widget.EasyRead.PdfPageCounter"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="5dp"
+            android:layout_weight="1"
+            android:maxLines="1"
+            android:text="@string/pdf_page" />
+
+        <ImageButton
+            android:id="@+id/buttonPdfNext"
+            style="@style/Widget.EasyRead.PdfToolbarIcon"
+            android:layout_marginStart="5dp"
+            android:contentDescription="@string/pdf_next"
+            android:rotation="180"
+            android:src="@drawable/ic_back" />
+
+        <ImageButton
+            android:id="@+id/buttonPdfCompatFit"
+            style="@style/Widget.EasyRead.PdfToolbarIcon"
+            android:layout_marginStart="5dp"
+            android:contentDescription="@string/pdf_fit"
+            android:src="@drawable/ic_grid" />
+
+        <ImageButton
+            android:id="@+id/buttonPdfBookmark"
+            style="@style/Widget.EasyRead.PdfToolbarIcon"
+            android:layout_marginStart="5dp"
+            android:contentDescription="@string/pdf_bookmark"
+            android:src="@drawable/ic_bookmark" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/pdfCompatStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/surface_elevated"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:paddingStart="12dp"
+        android:paddingTop="5dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="5dp"
+        android:text="@string/pdf_loading"
+        android:textColor="@color/text_secondary"
+        android:textSize="10sp" />
+
+    <com.bimo.easytoread.ZoomImageView
+        android:id="@+id/pdfCompatImage"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="6dp"
+        android:layout_weight="1"
+        android:background="@color/surface_editor"
+        android:contentDescription="@string/pdf_page_preview" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="62dp"
+        android:background="@drawable/bg_action_shelf"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="4dp">
+
+        <Button
+            android:id="@+id/buttonPdfText"
+            style="@style/Widget.EasyRead.PdfAction.Primary"
+            android:drawableTop="@drawable/ic_read"
+            android:text="@string/pdf_page_text" />
+
+        <Button
+            android:id="@+id/buttonPdfCompatShare"
+            style="@style/Widget.EasyRead.PdfAction"
+            android:drawableTop="@drawable/ic_share"
+            android:text="@string/share" />
+
+        <Button
+            android:id="@+id/buttonPdfCompatOcr"
+            style="@style/Widget.EasyRead.PdfAction"
+            android:drawableTop="@drawable/ic_read"
+            android:text="@string/ocr" />
+
+        <Button
+            android:id="@+id/buttonPdfCompatSave"
+            style="@style/Widget.EasyRead.PdfAction"
+            android:drawableTop="@drawable/ic_export"
+            android:text="@string/pdf_save" />
+
+        <Button
+            android:id="@+id/buttonPdfMore"
+            style="@style/Widget.EasyRead.PdfAction"
+            android:drawableTop="@drawable/ic_more"
+            android:text="@string/more" />
+    </LinearLayout>
+</LinearLayout>
