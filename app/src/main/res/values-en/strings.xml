@@ -169,7 +169,7 @@
     <string name="pdf_open_button">Open PDF</string>
     <string name="pdf_open_from">Device or cloud drive</string>
     <string name="pdf_recent">Recently opened</string>
-    <string name="pdf_recent_empty">No recent PDFs. Open one from your device, OneDrive, Google Drive, or another provider in Android's file picker.</string>
+    <string name="pdf_recent_empty">No recent PDFs. Open one from your device, OneDrive, Google Drive, or another provider in Android\'s file picker.</string>
     <string name="pdf_clear_recent">Clear history</string>
     <string name="pdf_recent_page">Page %1$d</string>
     <string name="pdf_search">Find text</string>
