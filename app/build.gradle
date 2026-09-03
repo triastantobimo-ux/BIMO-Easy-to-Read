@@ -11,7 +11,7 @@ if (!allowedTargetAbis.contains(targetAbi)) {
 
 android {
     namespace 'com.bimo.easytoread'
-    compileSdk 36
+    compileSdk 37
 
     defaultConfig {
         applicationId 'com.bimo.easytoread'

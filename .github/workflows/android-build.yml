@@ -39,7 +39,7 @@ jobs:
         shell: bash
         run: |
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"             "platforms;android-36"             "build-tools;36.0.0"             "platform-tools"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"             "platforms;android-37"             "build-tools;36.0.0"             "platform-tools"
 
       - name: Generate pinned Gradle Wrapper
         run: gradle wrapper --gradle-version 9.4.1
