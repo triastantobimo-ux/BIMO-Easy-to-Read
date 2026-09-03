@@ -32,7 +32,7 @@ public final class BimoPdfEngine implements Closeable {
         ParcelFileDescriptor descriptor = context.getContentResolver().openFileDescriptor(uri, "r");
         if (descriptor == null) throw new IOException("Document provider returned no file descriptor.");
         try {
-            PdfiumCore core = new PdfiumCore(context.getApplicationContext());
+            PdfiumCore core = new PdfiumCore();
             PdfDocument document = core.newDocument(descriptor, password);
             BimoPdfEngine engine = new BimoPdfEngine(descriptor, core, document);
             if (engine.getPageCount() <= 0) {
