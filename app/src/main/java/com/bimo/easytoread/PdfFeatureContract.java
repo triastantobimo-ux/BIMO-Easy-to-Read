@@ -24,6 +24,7 @@ public final class PdfFeatureContract {
                 "Erase, undo, and redo",
                 "PDF form filling",
                 "Visual signature as ink annotation",
+                "Supported page text/image object edit on S Extension 19+",
                 "Save original when writable or save a copy"
         };
     }
@@ -31,7 +32,7 @@ public final class PdfFeatureContract {
     public static String[] explicitNonClaims() {
         return new String[] {
                 "Certificate-based digital signature",
-                "Arbitrary text-object replacement with exact embedded-font guarantee",
+                "Exact embedded-font glyph guarantee for arbitrary replacement text",
                 "Page merge, split, reorder, or compression",
                 "Password removal or security bypass"
         };

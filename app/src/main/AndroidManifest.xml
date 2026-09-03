@@ -37,6 +37,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".PdfObjectEditorActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".PdfLibraryActivity"
             android:exported="false" />
 

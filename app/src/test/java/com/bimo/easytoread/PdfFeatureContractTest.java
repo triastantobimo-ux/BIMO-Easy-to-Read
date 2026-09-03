@@ -10,7 +10,7 @@ public final class PdfFeatureContractTest {
     @Test
     public void readerAndEditorRemainStandaloneFromOcrAndPdfTools() {
         assertEquals(6, PdfFeatureContract.readerFeatures().length);
-        assertEquals(5, PdfFeatureContract.editorFeatures().length);
+        assertEquals(6, PdfFeatureContract.editorFeatures().length);
         assertEquals(4, PdfFeatureContract.explicitNonClaims().length);
     }
 

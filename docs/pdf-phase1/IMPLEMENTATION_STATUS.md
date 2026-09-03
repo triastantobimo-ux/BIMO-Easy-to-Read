@@ -15,10 +15,11 @@ Status labels: `Implemented`, `Cloud verified`, `Device validation pending`, `Ou
 | Ink/highlight/erase/undo/redo | Implemented with capability gate | Requires Android S extension 18; device validation pending |
 | Form filling | Implemented with capability gate | Requires supported PDF form and Android S extension 18 |
 | Save original/save copy | Implemented | SAF write path; device validation pending |
+| Supported text-object edit preserving existing object styling | Implemented with capability gate | Requires Android S extension 19; exact new-glyph rendering remains PDF-font dependent |
+| Insert/delete supported image objects | Implemented with capability gate | Requires Android S extension 19; device validation pending |
 | Certificate digital signing | Out of Phase 1 | Must not be represented as visual ink signing |
-| Arbitrary exact-font text-object editing | Out of Phase 1 | Platform limitations require a separate controlled editor design |
+| Exact embedded-font glyph guarantee for arbitrary new text | Out of Phase 1 | Source font may not contain replacement glyphs |
 | Merge/split/reorder/convert/compress | Out of Phase 1 | Assigned to PDF All-in-One Tools |
 
 This file must be updated to `Cloud verified` only after GitHub Actions tests, lint, permission audit, and debug APK build pass. Physical-device behavior remains unverified until tested on the target Xiaomi device.
-
 

@@ -31,15 +31,19 @@ On devices with Android S extension 18 or later:
 - Save to the original URI when writable, otherwise save a copy through Android Storage Access Framework.
 - Warn before closing with unsaved edits.
 
+On devices with Android S extension 19 or later, the advanced content editor can select supported
+text/image page objects, replace text using the existing object's font/style/matrix, insert an image
+at a selected page position, delete a supported object, and save a new PDF copy.
+
 ## Explicit boundaries
 
 - A handwritten mark is a visual signature, not a certificate-backed digital signature.
-- Exact arbitrary replacement of existing text while preserving every embedded font is not claimed by this phase.
+- Existing supported text-object styling is retained, but exact rendering of arbitrary replacement
+  glyphs cannot be guaranteed when those glyphs are absent from the embedded font.
 - Merge, split, reorder, convert, compress, redact, encrypt, and certificate signing belong to the standalone PDF Tools phase.
 - OCR is not required to read a normal text-layer PDF.
 
 ## Privacy and connectivity
 
 The application declares no `INTERNET`, `ACCESS_NETWORK_STATE`, advertising-ID, or broad-storage permission. A cloud-drive file is accessed only through the Android document provider selected by the user. The application receives a scoped URI grant, not cloud credentials.
-
 

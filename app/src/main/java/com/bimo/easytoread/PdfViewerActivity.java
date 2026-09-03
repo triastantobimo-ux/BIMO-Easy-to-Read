@@ -61,6 +61,7 @@ public final class PdfViewerActivity extends AppCompatActivity implements PdfWor
     private static final int MENU_SAVE = 5;
     private static final int MENU_SAVE_COPY = 6;
     private static final int MENU_SIGNATURE_INFO = 7;
+    private static final int MENU_EDIT_CONTENT = 8;
 
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private Uri sourceUri;
@@ -344,7 +345,8 @@ public final class PdfViewerActivity extends AppCompatActivity implements PdfWor
         menu.add(Menu.NONE, MENU_SAVE_COPY, 3, R.string.pdf_save_copy);
         menu.add(Menu.NONE, MENU_PRINT, 4, R.string.pdf_print);
         menu.add(Menu.NONE, MENU_OCR, 5, R.string.pdf_ocr_page);
-        menu.add(Menu.NONE, MENU_SIGNATURE_INFO, 6, R.string.pdf_visual_signature_note);
+        menu.add(Menu.NONE, MENU_EDIT_CONTENT, 6, R.string.pdf_object_editor);
+        menu.add(Menu.NONE, MENU_SIGNATURE_INFO, 7, R.string.pdf_visual_signature_note);
         popup.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
                 case MENU_JUMP:
@@ -361,6 +363,9 @@ public final class PdfViewerActivity extends AppCompatActivity implements PdfWor
                     return true;
                 case MENU_OCR:
                     openCurrentPageAsOcr();
+                    return true;
+                case MENU_EDIT_CONTENT:
+                    openObjectEditor();
                     return true;
                 case MENU_SIGNATURE_INFO:
                     new AlertDialog.Builder(this)
@@ -543,6 +548,23 @@ public final class PdfViewerActivity extends AppCompatActivity implements PdfWor
         intent.putExtra(MainActivity.EXTRA_PDF_PAGE_INDEX, currentPage);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivity(intent);
+    }
+
+    private void openObjectEditor() {
+        if (!PdfObjectEditorActivity.supportsObjectEditing()) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.pdf_object_editor)
+                    .setMessage(R.string.pdf_object_editor_unavailable)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show();
+            return;
+        }
+        startActivity(PdfObjectEditorActivity.createIntent(
+                this,
+                sourceUri,
+                currentPage,
+                displayName
+        ));
     }
 
     private void handleClose() {
