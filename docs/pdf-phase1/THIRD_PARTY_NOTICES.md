@@ -1,8 +1,8 @@
 # BIMO PDF Core third-party notices
 
-## PdfiumAndroidKt 2.0.3
+## PdfiumAndroidKt 1.0.33
 
-- Project: `io.legere:pdfiumandroid:2.0.3`
+- Project: `io.legere:pdfiumandroid:1.0.33`
 - Source: https://github.com/johngray1965/PdfiumAndroidKt
 - License: Apache License 2.0
 - Role: Java/Kotlin Android binding and packaged native PDFium binaries.

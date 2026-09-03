@@ -2,7 +2,7 @@ package com.bimo.easytoread;
 
 /** Auditable Phase 1 boundary for the standalone BIMO PDF processor. */
 public final class PdfFeatureContract {
-    public static final String ENGINE = "Bundled PDFium 2.0.3";
+    public static final String ENGINE = "Bundled PDFium 1.0.33";
     public static final boolean REQUIRES_SDK_EXTENSION = false;
     public static final boolean REQUIRES_RUNTIME_DOWNLOAD = false;
 

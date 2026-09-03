@@ -9,7 +9,7 @@ import org.junit.Test;
 public final class PdfFeatureContractTest {
     @Test
     public void pdfProcessorIsBundledAndIndependentFromSdkExtensions() {
-        assertEquals("Bundled PDFium 2.0.3", PdfFeatureContract.ENGINE);
+        assertEquals("Bundled PDFium 1.0.33", PdfFeatureContract.ENGINE);
         assertFalse(PdfFeatureContract.REQUIRES_SDK_EXTENSION);
         assertFalse(PdfFeatureContract.REQUIRES_RUNTIME_DOWNLOAD);
     }

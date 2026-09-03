@@ -11,7 +11,7 @@ if (!allowedTargetAbis.contains(targetAbi)) {
 
 android {
     namespace 'com.bimo.easytoread'
-    compileSdk 37
+    compileSdk 36
 
     defaultConfig {
         applicationId 'com.bimo.easytoread'
@@ -88,7 +88,7 @@ dependencies {
     // Phase 1 PDF workspace. PDFium is packaged in the APK; no SDK Extension
     // or separately installed PDF component is required at runtime.
     implementation 'androidx.appcompat:appcompat:1.7.1'
-    implementation 'io.legere:pdfiumandroid:2.0.3'
+    implementation 'io.legere:pdfiumandroid:1.0.33'
 
     testImplementation 'junit:junit:4.13.2'
 }

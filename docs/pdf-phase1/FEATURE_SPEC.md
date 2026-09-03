@@ -2,7 +2,7 @@
 
 ## Locked architecture
 
-The application owns its PDF processing path. `io.legere:pdfiumandroid:2.0.3`
+The application owns its PDF processing path. `io.legere:pdfiumandroid:1.0.33`
 packages PDFium native binaries inside the APK. Opening, rendering, text extraction,
 search, and the PDF-to-OCR page bridge do not depend on AndroidX PDF, Android SDK
 Extensions, a browser, an external PDF application, an account, or a runtime download.
