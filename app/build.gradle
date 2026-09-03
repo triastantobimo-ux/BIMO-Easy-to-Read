@@ -18,8 +18,8 @@ android {
         applicationId 'com.bimo.easytoread'
         minSdk 31
         targetSdk 36
-        versionCode 6
-        versionName '0.6.0-pdf-phase1'
+        versionCode 7
+        versionName '0.6.1-pdf-hotfix'
         testInstrumentationRunner 'android.test.InstrumentationTestRunner'
         ndk {
             abiFilters targetAbi
@@ -93,4 +93,3 @@ dependencies {
 
     testImplementation 'junit:junit:4.13.2'
 }
-

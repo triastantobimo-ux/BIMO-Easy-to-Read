@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/surface_base"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="68dp"
+        android:background="@color/surface_top"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <ImageButton
+            android:id="@+id/buttonPdfCompatBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/back"
+            android:padding="13dp"
+            android:src="@drawable/ic_back" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/pdfCompatTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="middle"
+                android:maxLines="1"
+                android:textColor="@color/text_primary"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/pdf_compat_title"
+                android:textColor="@color/text_secondary"
+                android:textSize="11sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@drawable/bg_utility_bar"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="7dp">
+
+        <Button
+            android:id="@+id/buttonPdfPrevious"
+            style="@style/Widget.EasyRead.Button.Secondary"
+            android:layout_width="54dp"
+            android:layout_height="42dp"
+            android:text="@string/pdf_previous" />
+
+        <Button
+            android:id="@+id/buttonPdfCompatPage"
+            style="@style/Widget.EasyRead.Button.Secondary"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:layout_marginStart="7dp"
+            android:layout_weight="1"
+            android:text="@string/pdf_page" />
+
+        <Button
+            android:id="@+id/buttonPdfNext"
+            style="@style/Widget.EasyRead.Button.Secondary"
+            android:layout_width="54dp"
+            android:layout_height="42dp"
+            android:layout_marginStart="7dp"
+            android:text="@string/pdf_next" />
+
+        <Button
+            android:id="@+id/buttonPdfCompatFit"
+            style="@style/Widget.EasyRead.Button.Secondary"
+            android:layout_width="72dp"
+            android:layout_height="42dp"
+            android:layout_marginStart="7dp"
+            android:text="@string/pdf_fit" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/pdfCompatStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/surface_elevated"
+        android:paddingStart="14dp"
+        android:paddingTop="7dp"
+        android:paddingEnd="14dp"
+        android:paddingBottom="7dp"
+        android:text="@string/pdf_loading"
+        android:textColor="@color/text_secondary"
+        android:textSize="11sp" />
+
+    <com.bimo.easytoread.ZoomImageView
+        android:id="@+id/pdfCompatImage"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="8dp"
+        android:layout_weight="1"
+        android:background="@color/surface_editor"
+        android:contentDescription="@string/pdf_page_preview" />
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:background="@drawable/bg_action_shelf"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="5dp">
+
+            <Button
+                android:id="@+id/buttonPdfCompatShare"
+                style="@style/Widget.EasyRead.WorkspaceAction"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:drawableTop="@drawable/ic_share"
+                android:text="@string/share" />
+
+            <Button
+                android:id="@+id/buttonPdfCompatOcr"
+                style="@style/Widget.EasyRead.WorkspaceAction"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:drawableTop="@drawable/ic_read"
+                android:text="@string/pdf_ocr_page" />
+
+            <Button
+                android:id="@+id/buttonPdfCompatSave"
+                style="@style/Widget.EasyRead.WorkspaceAction"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:drawableTop="@drawable/ic_export"
+                android:text="@string/pdf_save_copy" />
+
+            <Button
+                android:id="@+id/buttonPdfAdvanced"
+                style="@style/Widget.EasyRead.WorkspaceAction.Primary"
+                android:layout_width="112dp"
+                android:layout_height="match_parent"
+                android:drawableTop="@drawable/ic_edit"
+                android:text="@string/pdf_advanced" />
+        </LinearLayout>
+    </HorizontalScrollView>
+</LinearLayout>

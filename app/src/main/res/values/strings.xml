@@ -239,6 +239,13 @@
     <string name="pdf_password_or_corrupt">PDF mungkin diproteksi password, rusak, atau tidak didukung.</string>
     <string name="share_document">Bagikan dokumen</string>
     <string name="pdf_page_preview">Pratinjau halaman PDF</string>
+    <string name="pdf_compat_title">PDF Reader aman</string>
+    <string name="pdf_compat_ready_basic">Mode kompatibilitas aktif. Geser dua jari untuk zoom. Reader lanjutan memerlukan Android SDK Extension 13.</string>
+    <string name="pdf_compat_ready_advanced">PDF dibuka dengan renderer stabil. Geser dua jari untuk zoom; pilih Editor lanjutan untuk pencarian, seleksi teks, anotasi, dan form.</string>
+    <string name="pdf_previous">Sebelum</string>
+    <string name="pdf_next">Berikut</string>
+    <string name="pdf_fit">Pas layar</string>
+    <string name="pdf_advanced">Editor lanjutan</string>
     <string name="previous_page">Sebelum</string>
     <string name="next_page">Berikut</string>
     <string name="reset_zoom">Reset zoom</string>
@@ -286,4 +293,3 @@
     <string name="export_no_app_title">Aplikasi tujuan tidak tersedia</string>
     <string name="export_no_app_fallback">File tetap dapat disimpan melalui Save As.</string>
 </resources>
-

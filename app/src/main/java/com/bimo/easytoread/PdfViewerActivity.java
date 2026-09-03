@@ -85,11 +85,23 @@ public final class PdfViewerActivity extends AppCompatActivity implements PdfWor
     private Uri pendingSaveUri;
 
     public static Intent createIntent(Context context, Uri uri) {
+        // AndroidX PDF requires Android S SDK Extension 13.  Open every document
+        // through the platform-renderer workspace first so unsupported or vendor-
+        // lagging devices never crash while constructing PdfViewerFragment.
+        return PdfCompatActivity.createIntent(context, uri);
+    }
+
+    static Intent createAdvancedIntent(Context context, Uri uri) {
         return new Intent(context, PdfViewerActivity.class)
                 .setData(uri)
                 .putExtra(EXTRA_SOURCE_URI, uri)
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
                         | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+    }
+
+    static boolean supportsAndroidxPdfViewer() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                && SdkExtensions.getExtensionVersion(Build.VERSION_CODES.S) >= 13;
     }
 
     @Override
@@ -101,6 +113,13 @@ public final class PdfViewerActivity extends AppCompatActivity implements PdfWor
     protected void onCreate(Bundle state) {
         AppPreferences.applyTheme(this);
         super.onCreate(state);
+        if (!supportsAndroidxPdfViewer()) {
+            Uri fallbackUri = readUriExtra(getIntent(), EXTRA_SOURCE_URI);
+            if (fallbackUri == null) fallbackUri = getIntent().getData();
+            if (fallbackUri != null) startActivity(PdfCompatActivity.createIntent(this, fallbackUri));
+            finish();
+            return;
+        }
         setContentView(R.layout.activity_pdf_viewer);
 
         sourceUri = readUriExtra(getIntent(), EXTRA_SOURCE_URI);
@@ -693,4 +712,3 @@ public final class PdfViewerActivity extends AppCompatActivity implements PdfWor
         super.onDestroy();
     }
 }
-

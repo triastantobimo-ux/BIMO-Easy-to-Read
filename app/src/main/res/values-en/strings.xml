@@ -239,6 +239,13 @@
     <string name="pdf_password_or_corrupt">The PDF may be password protected, damaged, or unsupported.</string>
     <string name="share_document">Share document</string>
     <string name="pdf_page_preview">PDF page preview</string>
+    <string name="pdf_compat_title">Safe PDF Reader</string>
+    <string name="pdf_compat_ready_basic">Compatibility mode is active. Pinch to zoom. The advanced reader requires Android SDK Extension 13.</string>
+    <string name="pdf_compat_ready_advanced">The PDF is open in the stable renderer. Pinch to zoom; choose Advanced editor for search, text selection, annotations, and forms.</string>
+    <string name="pdf_previous">Previous</string>
+    <string name="pdf_next">Next</string>
+    <string name="pdf_fit">Fit</string>
+    <string name="pdf_advanced">Advanced editor</string>
     <string name="previous_page">Previous</string>
     <string name="next_page">Next</string>
     <string name="reset_zoom">Reset zoom</string>
@@ -286,4 +293,3 @@
     <string name="export_no_app_title">No compatible app available</string>
     <string name="export_no_app_fallback">You can still save the file using Save As.</string>
 </resources>
-
